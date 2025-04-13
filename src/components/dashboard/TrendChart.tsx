@@ -1,25 +1,8 @@
 
-import { useState } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Sample data
-const revenueData = [
-  { month: "Jan", value: 1200 },
-  { month: "Feb", value: 1900 },
-  { month: "Mar", value: 1600 },
-  { month: "Apr", value: 2200 },
-  { month: "May", value: 2500 },
-  { month: "Jun", value: 2300 },
-  { month: "Jul", value: 2800 },
-  { month: "Aug", value: 3100 },
-  { month: "Sep", value: 2900 },
-  { month: "Oct", value: 3300 },
-  { month: "Nov", value: 3500 },
-  { month: "Dec", value: 3800 },
-];
-
 const ordersData = [
   { month: "Jan", value: 120 },
   { month: "Feb", value: 190 },
@@ -40,12 +23,7 @@ interface TrendChartProps {
 }
 
 export function TrendChart({ className }: TrendChartProps) {
-  const [view, setView] = useState("revenue");
-  
-  const data = view === "revenue" ? revenueData : ordersData;
-  const formatter = view === "revenue" 
-    ? (value: number) => `$${value}K`
-    : (value: number) => `${value}`;
+  const formatter = (value: number) => `${value}`;
   
   return (
     <Card className={className}>
@@ -53,20 +31,14 @@ export function TrendChart({ className }: TrendChartProps) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Monthly Trend</CardTitle>
-            <CardDescription>Sales performance over time</CardDescription>
+            <CardDescription>Order volume over time</CardDescription>
           </div>
-          <Tabs defaultValue="revenue" onValueChange={setView}>
-            <TabsList>
-              <TabsTrigger value="revenue">Revenue</TabsTrigger>
-              <TabsTrigger value="orders">Orders</TabsTrigger>
-            </TabsList>
-          </Tabs>
         </div>
       </CardHeader>
       <CardContent className="pt-4">
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+            <AreaChart data={ordersData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
               <defs>
                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
