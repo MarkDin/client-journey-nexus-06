@@ -1,10 +1,8 @@
-
 import { useState } from "react";
 import { 
   ArrowUpDown, 
   CheckCircle2, 
   Circle, 
-  EyeIcon, 
   Filter, 
   HelpCircle, 
   Search, 
@@ -30,7 +28,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-// Sample data
 const clients = [
   { 
     id: 1, 
@@ -144,11 +141,9 @@ export function ClientTable({ onViewClient }: ClientTableProps) {
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   
-  // Get unique values for filters
   const industries = Array.from(new Set(clients.map(client => client.industry)));
   const regions = Array.from(new Set(clients.map(client => client.region)));
   
-  // Filter clients based on search and filters
   const filteredClients = clients.filter(client => {
     const matchesSearch = !searchQuery || 
       client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -167,7 +162,6 @@ export function ClientTable({ onViewClient }: ClientTableProps) {
     return matchesSearch && matchesIndustry && matchesRegion && matchesStatus;
   });
   
-  // Helper for score badge colors
   const getScoreBadgeColor = (score: string) => {
     switch (score) {
       case "A": return "bg-success text-success-foreground";
@@ -312,19 +306,18 @@ export function ClientTable({ onViewClient }: ClientTableProps) {
                   <ArrowUpDown className="h-3 w-3" />
                 </div>
               </TableHead>
-              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredClients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
                   No clients found. Try adjusting your filters.
                 </TableCell>
               </TableRow>
             ) : (
               filteredClients.map((client) => (
-                <TableRow key={client.id}>
+                <TableRow key={client.id} onClick={() => onViewClient(client.id)} className="cursor-pointer">
                   <TableCell className="font-medium">{client.name}</TableCell>
                   <TableCell>{client.industry}</TableCell>
                   <TableCell>{client.salesRep}</TableCell>
@@ -350,15 +343,6 @@ export function ClientTable({ onViewClient }: ClientTableProps) {
                     </div>
                   </TableCell>
                   <TableCell>{new Date(client.lastOrder).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={() => onViewClient(client.id)}
-                    >
-                      <EyeIcon className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
                 </TableRow>
               ))
             )}
