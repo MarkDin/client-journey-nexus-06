@@ -1,18 +1,27 @@
 
-import { XIcon } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetClose
+} from "@/components/ui/sheet";
 
 interface ClientDetailProps {
   clientId: number;
   onClose: () => void;
+  open: boolean;
 }
 
-export function ClientDetail({ clientId, onClose }: ClientDetailProps) {
+export function ClientDetail({ clientId, onClose, open }: ClientDetailProps) {
   // This would typically fetch client data based on the ID
   // For simplicity, we'll use hardcoded data
   const client = {
@@ -75,20 +84,26 @@ export function ClientDetail({ clientId, onClose }: ClientDetailProps) {
   };
   
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50">
-      <div className="fixed inset-y-0 right-0 w-full sm:w-3/4 md:w-2/3 lg:w-1/2 xl:w-2/5 bg-card shadow-lg z-50 flex flex-col border-l">
-        <header className="p-4 border-b flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold leading-tight">{client.name}</h2>
-            <p className="text-muted-foreground">{client.industry} · {client.region}</p>
+    <Sheet open={open} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="w-full sm:max-w-md md:max-w-lg overflow-y-auto p-0">
+        <SheetHeader className="p-4 border-b">
+          <div className="flex items-center justify-between">
+            <div>
+              <SheetTitle className="text-xl">{client.name}</SheetTitle>
+              <SheetDescription className="text-sm text-muted-foreground">
+                {client.industry} · {client.region}
+              </SheetDescription>
+            </div>
+            <SheetClose asChild>
+              <Button variant="ghost" size="icon" onClick={onClose}>
+                <X className="h-5 w-5" />
+              </Button>
+            </SheetClose>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <XIcon className="h-5 w-5" />
-          </Button>
-        </header>
+        </SheetHeader>
         
-        <ScrollArea className="flex-1 p-4">
-          <Tabs defaultValue="overview">
+        <ScrollArea className="h-[calc(100vh-80px)] p-4">
+          <Tabs defaultValue="overview" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="communication">Communication</TabsTrigger>
@@ -206,7 +221,7 @@ export function ClientDetail({ clientId, onClose }: ClientDetailProps) {
             </TabsContent>
           </Tabs>
         </ScrollArea>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

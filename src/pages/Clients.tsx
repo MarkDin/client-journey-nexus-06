@@ -20,7 +20,8 @@ const Clients = () => {
       {selectedClientId !== null && (
         <ClientDetail 
           clientId={selectedClientId} 
-          onClose={() => setSelectedClientId(null)} 
+          onClose={() => setSelectedClientId(null)}
+          open={selectedClientId !== null}
         />
       )}
     </AppLayout>
