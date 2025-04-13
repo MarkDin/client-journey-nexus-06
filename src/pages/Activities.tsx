@@ -1,17 +1,19 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, ChevronUp, Filter, Search, SortDesc } from "lucide-react";
+import { ChevronDown, ChevronUp, Filter, Search, SortDesc, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 // Combined activity data
 const activitiesData = [
   { 
     id: 1,
+    clientId: 1, // Added client ID field for navigation
     type: "new-order",
     title: "Global Industries Inc.",
     description: "Placed a new order of $125K",
@@ -21,6 +23,7 @@ const activitiesData = [
   },
   { 
     id: 3,
+    clientId: 1, // Both activities reference the same client for demo purposes
     type: "meeting",
     title: "Mike Johnson",
     description: "Quarterly review with Acme Manufacturing",
@@ -31,6 +34,7 @@ const activitiesData = [
 ];
 
 const Activities = () => {
+  const navigate = useNavigate();
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [filters, setFilters] = useState({
     meeting: true,
@@ -75,6 +79,11 @@ const Activities = () => {
       ...prev,
       [filterType]: !prev[filterType]
     }));
+  };
+
+  // Navigate to client details
+  const navigateToClientDetail = (clientId: number) => {
+    navigate(`/clients/${clientId}`);
   };
 
   return (
@@ -142,7 +151,11 @@ const Activities = () => {
             <div className="space-y-6">
               {filteredActivities.length > 0 ? (
                 filteredActivities.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
+                  <div 
+                    key={activity.id} 
+                    className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0 hover:bg-muted/30 p-2 rounded cursor-pointer transition-colors group"
+                    onClick={() => navigateToClientDetail(activity.clientId)}
+                  >
                     <div>
                       {activity.type === "meeting" ? (
                         <Badge className="rounded-md bg-accent text-accent-foreground hover:bg-accent">
@@ -155,7 +168,10 @@ const Activities = () => {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium">{activity.title}</h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-medium">{activity.title}</h4>
+                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <p className="text-sm text-muted-foreground">{activity.description}</p>
                       <div className="flex justify-between mt-2">
                         <p className="text-xs text-muted-foreground">{activity.dateDisplay}</p>
