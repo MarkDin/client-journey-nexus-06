@@ -7,7 +7,6 @@ import {
   Home,
   Menu,
   ShoppingBag,
-  Truck,
   Users,
   X,
 } from "lucide-react";
@@ -49,7 +48,6 @@ export function AppSidebar() {
     { icon: <BellRing size={18} />, label: "Activities & Alerts", href: "/activities" },
     { icon: <Users size={18} />, label: "Clients", href: "/clients" },
     { icon: <ShoppingBag size={18} />, label: "Orders", href: "/orders" },
-    { icon: <Truck size={18} />, label: "Shipments", href: "/shipments" },
     { icon: <FileBox size={18} />, label: "Reports", href: "/reports" },
     { icon: <BarChart3 size={18} />, label: "Analytics", href: "/analytics" },
   ];
