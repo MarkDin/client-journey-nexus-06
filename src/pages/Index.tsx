@@ -4,7 +4,6 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TrendChart } from "@/components/dashboard/TrendChart";
-import { ActivityAlerts } from "@/components/dashboard/ActivityAlerts";
 
 const Dashboard = () => {
   return (
@@ -36,12 +35,9 @@ const Dashboard = () => {
         />
       </div>
       
-      {/* Charts and Tables */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <TrendChart className="md:col-span-2" />
-        <div className="space-y-6">
-          <ActivityAlerts />
-        </div>
+      {/* Chart */}
+      <div className="grid grid-cols-1">
+        <TrendChart className="w-full" />
       </div>
     </AppLayout>
   );
