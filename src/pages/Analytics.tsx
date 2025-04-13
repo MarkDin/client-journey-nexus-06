@@ -6,6 +6,7 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { UserVisitChart } from "@/components/analytics/UserVisitChart";
 import { UserDeviceStats } from "@/components/analytics/UserDeviceStats";
 import { UserLocationMap } from "@/components/analytics/UserLocationMap";
+import { UserAnalyticsTable } from "@/components/analytics/UserAnalyticsTable";
 
 const Analytics = () => {
   return (
@@ -41,6 +42,11 @@ const Analytics = () => {
           icon={<BarChart3 className="h-5 w-5" />}
           trend={{ value: -3.6, label: "vs last month" }}
         />
+      </div>
+      
+      {/* User Analytics Table */}
+      <div className="mb-6">
+        <UserAnalyticsTable />
       </div>
       
       {/* User Visit Chart */}
