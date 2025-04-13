@@ -1,11 +1,19 @@
 
+import { useState } from "react";
 import { ArrowDownRight, ArrowUpRight, DollarSign, Package, PercentCircle } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TrendChart } from "@/components/dashboard/TrendChart";
+import { OrdersSidebar } from "@/components/dashboard/OrdersSidebar";
 
 const Dashboard = () => {
+  const [ordersSidebarOpen, setOrdersSidebarOpen] = useState(false);
+
+  const toggleOrdersSidebar = () => {
+    setOrdersSidebarOpen(!ordersSidebarOpen);
+  };
+
   return (
     <AppLayout>
       <PageHeader 
@@ -26,6 +34,8 @@ const Dashboard = () => {
           value="247"
           icon={<Package className="h-5 w-5" />}
           trend={{ value: 8, label: "vs last week" }}
+          onClick={toggleOrdersSidebar}
+          clickable
         />
         <StatsCard
           title="Goal Completion Rate"
@@ -39,6 +49,9 @@ const Dashboard = () => {
       <div className="grid grid-cols-1">
         <TrendChart className="w-full" />
       </div>
+
+      {/* Orders Sidebar */}
+      <OrdersSidebar isOpen={ordersSidebarOpen} onClose={() => setOrdersSidebarOpen(false)} />
     </AppLayout>
   );
 };

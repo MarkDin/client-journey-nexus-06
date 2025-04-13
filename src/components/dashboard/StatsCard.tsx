@@ -13,13 +13,29 @@ interface StatsCardProps {
     label: string;
   };
   className?: string;
+  clickable?: boolean;
+  onClick?: () => void;
 }
 
-export function StatsCard({ title, value, icon, trend, className }: StatsCardProps) {
+export function StatsCard({ 
+  title, 
+  value, 
+  icon, 
+  trend, 
+  className,
+  clickable = false,
+  onClick
+}: StatsCardProps) {
   const isTrendPositive = trend ? trend.value > 0 : undefined;
   
   return (
-    <Card className={className}>
+    <Card 
+      className={cn(
+        className,
+        clickable && "cursor-pointer transition-transform hover:scale-[1.01] hover:shadow-md"
+      )}
+      onClick={clickable ? onClick : undefined}
+    >
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
