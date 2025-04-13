@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,7 +50,7 @@ const salesRepActivities = [
   },
 ];
 
-// Sample data for order activities
+// Sample data for order activities - only keeping "new-order" type
 const orderActivities = [
   { 
     id: 1,
@@ -60,38 +59,6 @@ const orderActivities = [
     description: "Placed a new order of $125K",
     date: "Today, 10:30 AM",
     change: "25% larger than previous order"
-  },
-  { 
-    id: 2,
-    type: "modified",
-    client: "Tech Solutions Ltd.",
-    description: "Modified order #ORD-2025-1244",
-    date: "Today, 9:15 AM",
-    change: "Added 2 more items to order"
-  },
-  { 
-    id: 3,
-    type: "canceled",
-    client: "Atlas Construction",
-    description: "Canceled order #ORD-2025-1239",
-    date: "Yesterday",
-    change: "Customer changed requirements"
-  },
-  { 
-    id: 4,
-    type: "shipped",
-    client: "Premier Enterprises",
-    description: "Order #ORD-2025-1243 shipped",
-    date: "June 11, 2025",
-    change: "Ahead of schedule by 2 days"
-  },
-  { 
-    id: 5,
-    type: "delivered",
-    client: "Future Electronics",
-    description: "Order #ORD-2025-1240 delivered",
-    date: "June 10, 2025",
-    change: "Customer confirmed receipt"
   },
 ];
 
@@ -154,19 +121,8 @@ const Activities = () => {
                     {orderActivities.map((activity) => (
                       <div key={activity.id} className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
                         <div>
-                          <Badge className={cn(
-                            "rounded-md",
-                            activity.type === "new-order" && "bg-success text-success-foreground hover:bg-success",
-                            activity.type === "modified" && "bg-warning text-warning-foreground hover:bg-warning",
-                            activity.type === "canceled" && "bg-destructive text-destructive-foreground hover:bg-destructive",
-                            activity.type === "shipped" && "bg-primary text-primary-foreground hover:bg-primary",
-                            activity.type === "delivered" && "bg-accent text-accent-foreground hover:bg-accent",
-                          )}>
-                            {activity.type === "new-order" && "New"}
-                            {activity.type === "modified" && "Modified"}
-                            {activity.type === "canceled" && "Canceled"}
-                            {activity.type === "shipped" && "Shipped"}
-                            {activity.type === "delivered" && "Delivered"}
+                          <Badge className="rounded-md bg-success text-success-foreground hover:bg-success">
+                            New
                           </Badge>
                         </div>
                         <div className="flex-1 min-w-0">
