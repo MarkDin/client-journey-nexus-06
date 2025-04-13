@@ -4,54 +4,11 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ActivityAlerts } from "@/components/dashboard/ActivityAlerts";
 
-// Sample data for activities and alerts
-const clientActivities = [
-  { 
-    id: 1,
-    type: "new-order",
-    client: "Global Industries Inc.",
-    description: "Placed a new order of $125K",
-    date: "Today, 10:30 AM",
-    change: "Order value increased by 15% compared to last order"
-  },
-  { 
-    id: 2,
-    type: "churn-risk",
-    client: "Acme Manufacturing",
-    description: "Flagged as churn risk - no orders in 60 days",
-    date: "Yesterday",
-    change: "Last activity was on April 15"
-  },
-  { 
-    id: 3,
-    type: "tag-change",
-    client: "Tech Solutions Ltd.",
-    description: "Tag changed from 'Regular' to 'VIP'",
-    date: "Yesterday",
-    change: "Annual spend increased by 35%"
-  },
-  { 
-    id: 4,
-    type: "new-order",
-    client: "Premier Enterprises",
-    description: "Placed a new order of $45K",
-    date: "June 11, 2025",
-    change: "First order in Q2 2025"
-  },
-  { 
-    id: 5,
-    type: "churn-risk",
-    client: "Nordic Supplies",
-    description: "Flagged as churn risk - decreased order frequency",
-    date: "June 10, 2025",
-    change: "Orders down 40% vs last quarter"
-  },
-];
-
+// Sample data for sales rep activities
 const salesRepActivities = [
   { 
     id: 1,
@@ -137,94 +94,47 @@ const Activities = () => {
       />
       
       <div className="grid gap-6 md:grid-cols-3">
-        <div className="md:col-span-2 space-y-6">
-          <Tabs defaultValue="client">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="client">Client Activity</TabsTrigger>
-              <TabsTrigger value="rep">Sales Rep Activity</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="client" className="mt-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle>Recent Client Activities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {clientActivities.map((activity) => (
-                      <div key={activity.id} className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
-                        <div>
-                          <Badge className={cn(
-                            "rounded-md",
-                            activity.type === "new-order" && "bg-success text-success-foreground hover:bg-success",
-                            activity.type === "churn-risk" && "bg-destructive text-destructive-foreground hover:bg-destructive",
-                            activity.type === "tag-change" && "bg-warning text-warning-foreground hover:bg-warning",
-                          )}>
-                            {activity.type === "new-order" && "New Order"}
-                            {activity.type === "churn-risk" && "Churn Risk"}
-                            {activity.type === "tag-change" && "Tag Change"}
-                          </Badge>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium">{activity.client}</h4>
-                          <p className="text-sm text-muted-foreground">{activity.description}</p>
-                          <div className="flex justify-between mt-2">
-                            <p className="text-xs text-muted-foreground">{activity.date}</p>
-                            <p className="text-xs text-muted-foreground italic">
-                              {activity.change}
-                            </p>
-                          </div>
-                        </div>
+        <div className="md:col-span-2">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Sales Rep Activities</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {salesRepActivities.map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
+                    <div>
+                      <Badge className={cn(
+                        "rounded-md",
+                        activity.type === "client-visit" && "bg-primary text-primary-foreground hover:bg-primary",
+                        activity.type === "call" && "bg-secondary text-secondary-foreground hover:bg-secondary",
+                        activity.type === "meeting" && "bg-accent text-accent-foreground hover:bg-accent",
+                        activity.type === "proposal" && "bg-warning text-warning-foreground hover:bg-warning",
+                      )}>
+                        {activity.type === "client-visit" && "Visit"}
+                        {activity.type === "call" && "Call"}
+                        {activity.type === "meeting" && "Meeting"}
+                        {activity.type === "proposal" && "Proposal"}
+                      </Badge>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-medium">{activity.salesRep}</h4>
+                      <p className="text-sm text-muted-foreground">{activity.description}</p>
+                      <div className="flex justify-between mt-2">
+                        <p className="text-xs text-muted-foreground">{activity.date}</p>
+                        <p className="text-xs text-muted-foreground italic">
+                          {activity.change}
+                        </p>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="rep" className="mt-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle>Sales Rep Activities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {salesRepActivities.map((activity) => (
-                      <div key={activity.id} className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
-                        <div>
-                          <Badge className={cn(
-                            "rounded-md",
-                            activity.type === "client-visit" && "bg-primary text-primary-foreground hover:bg-primary",
-                            activity.type === "call" && "bg-secondary text-secondary-foreground hover:bg-secondary",
-                            activity.type === "meeting" && "bg-accent text-accent-foreground hover:bg-accent",
-                            activity.type === "proposal" && "bg-warning text-warning-foreground hover:bg-warning",
-                          )}>
-                            {activity.type === "client-visit" && "Visit"}
-                            {activity.type === "call" && "Call"}
-                            {activity.type === "meeting" && "Meeting"}
-                            {activity.type === "proposal" && "Proposal"}
-                          </Badge>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium">{activity.salesRep}</h4>
-                          <p className="text-sm text-muted-foreground">{activity.description}</p>
-                          <div className="flex justify-between mt-2">
-                            <p className="text-xs text-muted-foreground">{activity.date}</p>
-                            <p className="text-xs text-muted-foreground italic">
-                              {activity.change}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
         
-        <div>
+        <div className="space-y-6">
           <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -263,6 +173,8 @@ const Activities = () => {
               </div>
             </CardContent>
           </Card>
+          
+          <ActivityAlerts className="hidden md:block" />
         </div>
       </div>
     </AppLayout>
