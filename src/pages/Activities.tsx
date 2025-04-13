@@ -3,8 +3,6 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ActivityAlerts } from "@/components/dashboard/ActivityAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -94,39 +92,6 @@ const orderActivities = [
     description: "Order #ORD-2025-1240 delivered",
     date: "June 10, 2025",
     change: "Customer confirmed receipt"
-  },
-];
-
-const aiRecommendations = [
-  {
-    id: 1,
-    client: "Acme Manufacturing",
-    reason: "No communication in 30 days + historically orders quarterly",
-    priority: "high"
-  },
-  {
-    id: 2,
-    client: "Smart Systems Corp.",
-    reason: "Previous inquiry about new product line not followed up",
-    priority: "medium"
-  },
-  {
-    id: 3,
-    client: "European Imports",
-    reason: "Renewal coming up in 20 days",
-    priority: "high"
-  },
-  {
-    id: 4,
-    client: "Pacific Shipping Co.",
-    reason: "Recently upgraded to premium tier - check satisfaction",
-    priority: "medium"
-  },
-  {
-    id: 5,
-    client: "Future Electronics",
-    reason: "Decreased order volumes in last 2 months",
-    priority: "low"
   },
 ];
 
@@ -224,46 +189,7 @@ const Activities = () => {
         </div>
         
         <div className="space-y-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center">
-                  <Sparkles className="h-4 w-4 mr-2 text-warning" />
-                  AI Recommendations
-                </CardTitle>
-                <Button variant="ghost" size="sm">Refresh</Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Clients that may need follow-up based on past patterns and activity
-                </p>
-                
-                {aiRecommendations.map((rec) => (
-                  <div key={rec.id} className="pb-3 border-b last:border-0 last:pb-0">
-                    <div className="flex items-start justify-between">
-                      <h4 className="font-medium">{rec.client}</h4>
-                      <Badge className={cn(
-                        "rounded-sm",
-                        rec.priority === "high" && "bg-destructive text-destructive-foreground hover:bg-destructive",
-                        rec.priority === "medium" && "bg-warning text-warning-foreground hover:bg-warning",
-                        rec.priority === "low" && "bg-secondary text-secondary-foreground hover:bg-secondary",
-                      )}>
-                        {rec.priority}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">{rec.reason}</p>
-                    <Button size="sm" variant="outline" className="mt-2 w-full justify-center">
-                      Schedule Follow-up
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <ActivityAlerts className="hidden md:block" />
+          <ActivityAlerts />
         </div>
       </div>
     </AppLayout>
