@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   ArrowUpDown, 
   CheckCircle2, 
@@ -136,6 +137,7 @@ interface ClientTableProps {
 }
 
 export function ClientTable({ onViewClient }: ClientTableProps) {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
@@ -170,6 +172,11 @@ export function ClientTable({ onViewClient }: ClientTableProps) {
       case "D": return "bg-destructive text-destructive-foreground";
       default: return "";
     }
+  };
+
+  const handleClientNameClick = (clientId: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    navigate(`/clients/${clientId}`);
   };
   
   return (
@@ -318,7 +325,12 @@ export function ClientTable({ onViewClient }: ClientTableProps) {
             ) : (
               filteredClients.map((client) => (
                 <TableRow key={client.id} onClick={() => onViewClient(client.id)} className="cursor-pointer">
-                  <TableCell className="font-medium">{client.name}</TableCell>
+                  <TableCell 
+                    className="font-medium text-primary hover:underline cursor-pointer" 
+                    onClick={(e) => handleClientNameClick(client.id, e)}
+                  >
+                    {client.name}
+                  </TableCell>
                   <TableCell>{client.industry}</TableCell>
                   <TableCell>{client.salesRep}</TableCell>
                   <TableCell>{client.region}</TableCell>
