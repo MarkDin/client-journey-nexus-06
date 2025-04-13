@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import {
   BarChart3,
   BellRing,
-  FileBox,
   Home,
   Menu,
   ShoppingBag,
@@ -48,7 +47,6 @@ export function AppSidebar() {
     { icon: <BellRing size={18} />, label: "Activities & Alerts", href: "/activities" },
     { icon: <Users size={18} />, label: "Clients", href: "/clients" },
     { icon: <ShoppingBag size={18} />, label: "Orders", href: "/orders" },
-    { icon: <FileBox size={18} />, label: "Reports", href: "/reports" },
     { icon: <BarChart3 size={18} />, label: "Analytics", href: "/analytics" },
   ];
 
