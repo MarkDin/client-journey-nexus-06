@@ -4,9 +4,9 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, ChevronUp, Filter, SortDesc } from "lucide-react";
+import { ChevronDown, ChevronUp, Filter, Search, SortDesc } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 // Combined activity data
 const activitiesData = [
@@ -36,12 +36,24 @@ const Activities = () => {
     meeting: true,
     newOrder: true
   });
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Sort and filter activities
   const filteredActivities = activitiesData
     .filter(activity => {
+      // Filter by activity type
       if (activity.type === "meeting" && !filters.meeting) return false;
       if (activity.type === "new-order" && !filters.newOrder) return false;
+      
+      // Filter by search query
+      if (searchQuery.trim() !== "") {
+        const query = searchQuery.toLowerCase();
+        return (
+          activity.title.toLowerCase().includes(query) || 
+          activity.description.toLowerCase().includes(query)
+        );
+      }
+      
       return true;
     })
     .sort((a, b) => {
@@ -78,6 +90,16 @@ const Activities = () => {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
               <CardTitle>Activities</CardTitle>
               <div className="flex items-center gap-4">
+                <div className="relative w-full sm:w-auto max-w-sm">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    type="search"
+                    placeholder="Search clients..."
+                    className="pl-8 h-9 w-full sm:w-[200px] bg-background"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4 text-muted-foreground" />
                   <div className="flex items-center gap-2">
@@ -146,7 +168,7 @@ const Activities = () => {
                 ))
               ) : (
                 <div className="text-center py-6 text-muted-foreground">
-                  No activities match your filter criteria
+                  {searchQuery ? "No clients match your search criteria" : "No activities match your filter criteria"}
                 </div>
               )}
             </div>
