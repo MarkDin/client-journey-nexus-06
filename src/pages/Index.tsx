@@ -1,11 +1,12 @@
 
 import { useState } from "react";
-import { ArrowDownRight, ArrowUpRight, DollarSign, Package, PercentCircle } from "lucide-react";
+import { DollarSign, Package, PercentCircle } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TrendChart } from "@/components/dashboard/TrendChart";
 import { OrdersSidebar } from "@/components/dashboard/OrdersSidebar";
+import { GoalCompletionChart } from "@/components/dashboard/GoalCompletionChart";
 
 const Dashboard = () => {
   const [ordersSidebarOpen, setOrdersSidebarOpen] = useState(false);
@@ -45,9 +46,10 @@ const Dashboard = () => {
         />
       </div>
       
-      {/* Chart */}
-      <div className="grid grid-cols-1">
+      {/* Charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <TrendChart className="w-full" />
+        <GoalCompletionChart className="w-full" />
       </div>
 
       {/* Orders Sidebar */}
