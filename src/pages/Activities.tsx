@@ -6,24 +6,8 @@ import { cn } from "@/lib/utils";
 import { ActivityAlerts } from "@/components/dashboard/ActivityAlerts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Sample data for sales rep activities
+// Sample data for sales rep activities - only keeping "meeting" type
 const salesRepActivities = [
-  { 
-    id: 1,
-    type: "client-visit",
-    salesRep: "John Doe",
-    description: "On-site visit with Global Industries Inc.",
-    date: "Today, 2:00 PM",
-    change: "First visit in 3 months"
-  },
-  { 
-    id: 2,
-    type: "call",
-    salesRep: "Sarah Smith",
-    description: "3 follow-up calls with Tech Solutions Ltd.",
-    date: "Today, 9:00 AM",
-    change: "50% more calls than last week"
-  },
   { 
     id: 3,
     type: "meeting",
@@ -31,22 +15,6 @@ const salesRepActivities = [
     description: "Quarterly review with Acme Manufacturing",
     date: "Yesterday",
     change: "Discussed renewal options"
-  },
-  { 
-    id: 4,
-    type: "proposal",
-    salesRep: "Emily Brown",
-    description: "Sent proposal to Smart Systems Corp.",
-    date: "June 11, 2025",
-    change: "25% larger deal than previous"
-  },
-  { 
-    id: 5,
-    type: "call",
-    salesRep: "John Doe",
-    description: "Follow-up call with Premier Enterprises",
-    date: "June 10, 2025",
-    change: "Discussed expansion plans"
   },
 ];
 
@@ -88,17 +56,8 @@ const Activities = () => {
                     {salesRepActivities.map((activity) => (
                       <div key={activity.id} className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
                         <div>
-                          <Badge className={cn(
-                            "rounded-md",
-                            activity.type === "client-visit" && "bg-primary text-primary-foreground hover:bg-primary",
-                            activity.type === "call" && "bg-secondary text-secondary-foreground hover:bg-secondary",
-                            activity.type === "meeting" && "bg-accent text-accent-foreground hover:bg-accent",
-                            activity.type === "proposal" && "bg-warning text-warning-foreground hover:bg-warning",
-                          )}>
-                            {activity.type === "client-visit" && "Visit"}
-                            {activity.type === "call" && "Call"}
-                            {activity.type === "meeting" && "Meeting"}
-                            {activity.type === "proposal" && "Proposal"}
+                          <Badge className="rounded-md bg-accent text-accent-foreground hover:bg-accent">
+                            Meeting
                           </Badge>
                         </div>
                         <div className="flex-1 min-w-0">
