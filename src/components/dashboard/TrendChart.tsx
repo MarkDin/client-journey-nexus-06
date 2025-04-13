@@ -1,21 +1,21 @@
 
-import { Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Sample data with goal completion added
+// Sample data - remove goal completion data
 const chartData = [
-  { month: "Jan", orders: 120, goalCompletion: 65 },
-  { month: "Feb", orders: 190, goalCompletion: 68 },
-  { month: "Mar", orders: 160, goalCompletion: 70 },
-  { month: "Apr", orders: 220, goalCompletion: 72 },
-  { month: "May", orders: 250, goalCompletion: 75 },
-  { month: "Jun", orders: 230, goalCompletion: 76 },
-  { month: "Jul", orders: 280, goalCompletion: 78 },
-  { month: "Aug", orders: 310, goalCompletion: 80 },
-  { month: "Sep", orders: 290, goalCompletion: 82 },
-  { month: "Oct", orders: 330, goalCompletion: 84 },
-  { month: "Nov", orders: 350, goalCompletion: 85 },
-  { month: "Dec", orders: 380, goalCompletion: 88 },
+  { month: "Jan", orders: 120 },
+  { month: "Feb", orders: 190 },
+  { month: "Mar", orders: 160 },
+  { month: "Apr", orders: 220 },
+  { month: "May", orders: 250 },
+  { month: "Jun", orders: 230 },
+  { month: "Jul", orders: 280 },
+  { month: "Aug", orders: 310 },
+  { month: "Sep", orders: 290 },
+  { month: "Oct", orders: 330 },
+  { month: "Nov", orders: 350 },
+  { month: "Dec", orders: 380 },
 ];
 
 interface TrendChartProps {
@@ -31,7 +31,7 @@ export function TrendChart({ className }: TrendChartProps) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Monthly Trend</CardTitle>
-            <CardDescription>Order volume and goal completion over time</CardDescription>
+            <CardDescription>Order volume over time</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -50,22 +50,13 @@ export function TrendChart({ className }: TrendChartProps) {
                 tick={{ fontSize: 12 }}
               />
               <YAxis 
-                yAxisId="left"
                 tickFormatter={formatter}
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis 
-                yAxisId="right"
-                orientation="right"
-                domain={[0, 100]}
-                tickFormatter={(value) => `${value}%`}
                 tick={{ fontSize: 12 }}
               />
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <Tooltip 
                 formatter={(value: number, name: string) => {
                   if (name === "orders") return [formatter(value), "Orders"];
-                  if (name === "goalCompletion") return [`${value}%`, "Goal Completion"];
                   return [value, name];
                 }}
                 contentStyle={{
@@ -82,16 +73,6 @@ export function TrendChart({ className }: TrendChartProps) {
                 fillOpacity={1} 
                 fill="url(#colorOrders)" 
                 activeDot={{ r: 6 }}
-                yAxisId="left"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="goalCompletion" 
-                stroke="hsl(var(--secondary))" 
-                strokeDasharray="5 5" 
-                dot={{ r: 4, strokeWidth: 2 }}
-                activeDot={{ r: 6 }}
-                yAxisId="right"
               />
             </AreaChart>
           </ResponsiveContainer>
