@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { ArrowUpDown, Download } from "lucide-react";
+import { useState, useRef } from "react";
+import { ArrowUpDown, Upload } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
@@ -15,9 +15,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 // Sample data - removed status field
-const orders = [
+const initialOrders = [
   {
     id: "ORD-2025-1245",
     clientName: "Global Industries Inc.",
@@ -101,7 +102,42 @@ const orders = [
 ];
 
 const Orders = () => {
-  // Removed status filtering
+  const [orders, setOrders] = useState(initialOrders);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  
+  const handleImportClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Check if it's an Excel file
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls') && !file.name.endsWith('.csv')) {
+      toast({
+        title: "Invalid file format",
+        description: "Please select an Excel or CSV file",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // In a real application, you would parse the Excel file here
+    // For this demo, we'll just show a success message
+    toast({
+      title: "Import successful",
+      description: `Imported ${file.name}`,
+    });
+    
+    // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
   
   return (
     <AppLayout>
@@ -109,10 +145,19 @@ const Orders = () => {
         title="Order Management" 
         description="Monitor and manage all orders"
       >
-        <Button variant="outline">
-          <Download className="h-4 w-4 mr-2" />
-          Export to Excel
-        </Button>
+        <div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".xlsx,.xls,.csv"
+            className="hidden"
+          />
+          <Button variant="outline" onClick={handleImportClick}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import from Excel
+          </Button>
+        </div>
       </PageHeader>
       
       <Card>
