@@ -4,7 +4,6 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TrendChart } from "@/components/dashboard/TrendChart";
-import { TopPerformers } from "@/components/dashboard/TopPerformers";
 import { ActivityAlerts } from "@/components/dashboard/ActivityAlerts";
 
 const Dashboard = () => {
@@ -43,10 +42,6 @@ const Dashboard = () => {
         <div className="space-y-6">
           <ActivityAlerts />
         </div>
-      </div>
-      
-      <div className="mt-6">
-        <TopPerformers />
       </div>
     </AppLayout>
   );
