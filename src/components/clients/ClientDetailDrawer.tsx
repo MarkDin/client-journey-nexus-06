@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   X, 
@@ -17,8 +18,7 @@ import {
   MessageSquare, 
   ExternalLink,
   PieChart,
-  DollarSign,
-  AlertTriangle
+  DollarSign
 } from "lucide-react";
 import { 
   Sheet, 
@@ -114,6 +114,12 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
       { quarter: "Q2 2025", value: 323500 },
       { quarter: "Q3 2024", value: 214000 },
       { quarter: "Q4 2024", value: 278000 },
+    ],
+    // Add mock attachments data so we don't get undefined errors
+    attachments: [
+      { name: "Contract_2025_Renewal.pdf", date: "2025-05-12", type: "pdf", size: "1.2 MB" },
+      { name: "Product_Specifications.xlsx", date: "2025-04-28", type: "xlsx", size: "650 KB" },
+      { name: "Meeting_Notes_Q2_Review.docx", date: "2025-06-03", type: "docx", size: "320 KB" },
     ],
   } : null;
   
