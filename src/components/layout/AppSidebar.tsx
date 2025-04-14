@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   BarChart3,
   BellRing,
+  HelpCircle,
   Home,
   Menu,
   ShoppingBag,
@@ -110,15 +112,15 @@ export function AppSidebar() {
             ))}
           </nav>
           
-          {/* Sidebar Footer */}
+          {/* Sidebar Footer - Changed to "he l p" */}
           <div className="p-4 border-t border-sidebar-border">
             <div className="flex items-center gap-3 px-2">
               <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-accent-foreground">
-                SN
+                <HelpCircle size={16} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">Sales Admin</p>
-                <p className="text-xs text-sidebar-foreground/70 truncate">admin@salesnexus.com</p>
+                <p className="text-sm font-medium text-sidebar-foreground truncate">he l p</p>
+                <p className="text-xs text-sidebar-foreground/70 truncate">support@salesnexus.com</p>
               </div>
             </div>
           </div>
