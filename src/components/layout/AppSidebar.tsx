@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
@@ -105,11 +106,7 @@ export function AppSidebar() {
           
           <ScrollArea className="flex-1 h-[calc(100vh-4rem)]">
             <div className="p-3">
-              {[...mainMenu, { 
-                name: "Help & Support", 
-                href: "/support", 
-                icon: <HelpCircle className="h-5 w-5" /> 
-              }].map((item) => (
+              {mainMenu.map((item) => (
                 <NavLink
                   key={item.href}
                   to={item.href}
@@ -125,6 +122,24 @@ export function AppSidebar() {
                   <span>{item.name}</span>
                 </NavLink>
               ))}
+              
+              <div className="mt-auto mb-4">
+                <NavLink
+                  to="/support"
+                  onClick={() => setIsMobileOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                      "bg-[#1A1F2C] text-white hover:bg-[#2C3242]",
+                      isActive ? "ring-2 ring-primary" : "",
+                      "justify-center"
+                    )
+                  }
+                >
+                  <HelpCircle className="h-5 w-5" />
+                  <span>Help & Support</span>
+                </NavLink>
+              </div>
             </div>
           </ScrollArea>
         </div>
@@ -196,3 +211,4 @@ export function AppSidebar() {
     </div>
   );
 }
+
