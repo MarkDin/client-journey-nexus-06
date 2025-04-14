@@ -1,137 +1,180 @@
+
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import {
-  BarChart3,
-  BellRing,
-  Home,
-  Menu,
-  ShoppingBag,
-  Users,
-  X,
+import { NavLink, useLocation } from "react-router-dom";
+import { 
+  LayoutDashboard, 
+  Users, 
+  Package, 
+  Activity, 
+  BarChart2, 
+  Truck, 
+  Mail, 
+  ShieldQuestion, 
+  User, 
+  ChevronRight, 
+  Menu 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/use-mobile";
-
-interface NavItemProps {
-  icon: React.ReactNode;
-  label: string;
-  href: string;
-  isActive: boolean;
-  onClick?: () => void;
-}
-
-const NavItem = ({ icon, label, href, isActive, onClick }: NavItemProps) => (
-  <Link 
-    to={href} 
-    className={cn(
-      "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
-      isActive 
-        ? "bg-sidebar-accent text-sidebar-accent-foreground" 
-        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-    )}
-    onClick={onClick}
-  >
-    <div className="w-5 h-5">{icon}</div>
-    <span className="font-medium">{label}</span>
-  </Link>
-);
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMobile } from "@/hooks/use-mobile";
 
 export function AppSidebar() {
+  const isMobile = useMobile();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const location = useLocation();
-  const isMobile = useIsMobile();
-  const [isOpen, setIsOpen] = useState(!isMobile);
-
-  const navItems = [
-    { icon: <Home size={18} />, label: "Dashboard", href: "/" },
-    { icon: <BellRing size={18} />, label: "Activities & Alerts", href: "/activities" },
-    { icon: <Users size={18} />, label: "Clients", href: "/clients" },
-    { icon: <ShoppingBag size={18} />, label: "Orders", href: "/orders" },
-    { icon: <BarChart3 size={18} />, label: "Analytics", href: "/analytics" },
+  
+  const menu = [
+    { 
+      name: "Dashboard", 
+      href: "/", 
+      icon: <LayoutDashboard className="h-5 w-5" /> 
+    },
+    { 
+      name: "Activities", 
+      href: "/activities", 
+      icon: <Activity className="h-5 w-5" /> 
+    },
+    { 
+      name: "Clients", 
+      href: "/clients", 
+      icon: <Users className="h-5 w-5" /> 
+    },
+    { 
+      name: "Orders", 
+      href: "/orders", 
+      icon: <Package className="h-5 w-5" /> 
+    },
+    { 
+      name: "Shipments", 
+      href: "/shipments", 
+      icon: <Truck className="h-5 w-5" /> 
+    },
+    { 
+      name: "Communication", 
+      href: "/communication", 
+      icon: <Mail className="h-5 w-5" /> 
+    },
+    { 
+      name: "Users", 
+      href: "/users", 
+      icon: <User className="h-5 w-5" /> 
+    },
+    { 
+      name: "Analytics", 
+      href: "/analytics", 
+      icon: <BarChart2 className="h-5 w-5" /> 
+    },
+    { 
+      name: "Help & Support", 
+      href: "/support", 
+      icon: <ShieldQuestion className="h-5 w-5" /> 
+    },
   ];
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
+  
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
   };
-
-  return (
-    <>
-      {/* Mobile Menu Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={toggleSidebar}
-        className={cn(
-          "fixed top-4 left-4 z-50 md:hidden",
-          isOpen ? "hidden" : "block"
+  
+  const toggleMobileMenu = () => {
+    setIsMobileOpen(!isMobileOpen);
+  };
+  
+  const sidebarWidth = isCollapsed ? "w-16" : "w-64";
+  
+  if (isMobile) {
+    return (
+      <>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50"
+          onClick={toggleMobileMenu}
+        >
+          <Menu className="h-6 w-6" />
+        </Button>
+        
+        {isMobileOpen && (
+          <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsMobileOpen(false)} />
         )}
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
-      
-      {/* Sidebar */}
-      <div
-        className={cn(
-          "fixed inset-y-0 left-0 bg-sidebar z-40 w-64 transition-transform duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "-translate-x-full",
-          "md:translate-x-0"
-        )}
-      >
-        <div className="flex flex-col h-full">
-          {/* Sidebar Header */}
-          <div className="px-6 py-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                <ShoppingBag className="h-5 w-5 text-white" />
-              </div>
-              <h1 className="text-lg font-semibold text-white">SalesNexus</h1>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="md:hidden text-sidebar-foreground"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+        
+        <div
+          className={cn(
+            "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r shadow-lg transform transition-transform duration-200 ease-in-out",
+            isMobileOpen ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          <div className="h-16 border-b flex items-center px-4">
+            <h2 className="text-lg font-semibold">Sales Management</h2>
           </div>
           
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto scrollbar-thin">
-            {navItems.map((item) => (
-              <NavItem
-                key={item.href}
-                icon={item.icon}
-                label={item.label}
-                href={item.href}
-                isActive={location.pathname === item.href}
-                onClick={isMobile ? toggleSidebar : undefined}
-              />
-            ))}
-          </nav>
-          
-          {/* Sidebar Footer */}
-          <div className="p-4 border-t border-sidebar-border">
-            <div className="flex items-center gap-3 px-2">
-              <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sidebar-accent-foreground">
-                SN
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">Sales Admin</p>
-                <p className="text-xs text-sidebar-foreground/70 truncate">admin@salesnexus.com</p>
-              </div>
+          <ScrollArea className="flex-1 h-[calc(100vh-4rem)]">
+            <div className="p-3">
+              {menu.map((item) => (
+                <NavLink
+                  key={item.href}
+                  to={item.href}
+                  onClick={() => setIsMobileOpen(false)}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground mb-1",
+                      isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                    )
+                  }
+                >
+                  {item.icon}
+                  <span>{item.name}</span>
+                </NavLink>
+              ))}
             </div>
-          </div>
+          </ScrollArea>
         </div>
+      </>
+    );
+  }
+  
+  return (
+    <div
+      className={cn(
+        "fixed inset-y-0 left-0 z-20 bg-card border-r shadow-lg",
+        sidebarWidth,
+        "transition-width duration-300 ease-in-out"
+      )}
+    >
+      <div className="h-16 border-b flex items-center px-4">
+        {!isCollapsed && <h2 className="text-lg font-semibold">Sales Management</h2>}
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn("ml-auto", !isCollapsed && "rotate-180")}
+          onClick={toggleCollapse}
+        >
+          <ChevronRight className="h-5 w-5" />
+        </Button>
       </div>
       
-      {/* Backdrop for mobile */}
-      {isOpen && isMobile && (
-        <div 
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-30 md:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
-    </>
+      <ScrollArea className="flex-1 h-[calc(100vh-4rem)]">
+        <div className="p-3">
+          {menu.map((item) => (
+            <NavLink
+              key={item.href}
+              to={item.href}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground mb-1",
+                  isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+                  isCollapsed && "justify-center"
+                )
+              }
+              title={isCollapsed ? item.name : undefined}
+            >
+              {item.icon}
+              {!isCollapsed && <span>{item.name}</span>}
+            </NavLink>
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }

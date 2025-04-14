@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -15,8 +14,8 @@ import {
   YAxis 
 } from "recharts";
 import { ChevronLeft } from "lucide-react";
+import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 
-// Sample data for shipments visualization
 const productShipmentData = [
   { 
     product: "Industrial Sensors X-5200", 
@@ -84,11 +83,19 @@ const clientShipmentData = {
   ],
 };
 
+const clientIdMap: Record<string, number> = {
+  "Global Industries Inc.": 1,
+  "Smart Systems Corp.": 5,
+  "Acme Manufacturing": 4,
+  "Future Electronics": 6,
+};
+
 const Shipments = () => {
   const [drillLevel, setDrillLevel] = useState("product");
   const [selectedProduct, setSelectedProduct] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
+  const { openClientDrawer } = useClientDrawer();
   
   const handleDrillDown = (data: any) => {
     if (drillLevel === "product") {
@@ -115,8 +122,14 @@ const Shipments = () => {
       setDrillLevel("region");
     }
   };
+
+  const handleClientClick = (clientName: string) => {
+    const clientId = clientIdMap[clientName];
+    if (clientId) {
+      openClientDrawer(clientId);
+    }
+  };
   
-  // Determine which data to show based on drill level
   let chartData = productShipmentData;
   let xAxisDataKey = "product";
   let title = "Shipment Volume by Product";
@@ -139,7 +152,6 @@ const Shipments = () => {
     subtitle = `Product: ${selectedProduct} / Country: ${selectedCountry} / Region: ${selectedRegion}`;
   }
   
-  // Calculate totals and YoY comparison
   const currentTotal = chartData.reduce((sum, item) => sum + item.value, 0);
   const previousTotal = chartData.reduce((sum, item) => sum + item.previousYear, 0);
   const yoyChange = previousTotal > 0 
@@ -184,7 +196,7 @@ const Shipments = () => {
             </div>
             
             <p className="text-sm text-muted-foreground mt-2 md:mt-0">
-              Click on bars to drill down
+              {drillLevel === "client" ? "Click on client names to view details" : "Click on bars to drill down"}
             </p>
           </div>
           
@@ -219,7 +231,10 @@ const Shipments = () => {
                   dataKey="value" 
                   name="Current Year" 
                   fill="hsl(var(--primary))" 
-                  onClick={handleDrillDown}
+                  onClick={drillLevel === "client" 
+                    ? (data) => handleClientClick(data.client) 
+                    : handleDrillDown
+                  }
                   cursor="pointer"
                 />
                 <Bar 

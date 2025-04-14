@@ -7,12 +7,19 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TrendChart } from "@/components/dashboard/TrendChart";
 import { OrdersSidebar } from "@/components/dashboard/OrdersSidebar";
 import { GoalCompletionChart } from "@/components/dashboard/GoalCompletionChart";
+import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 
 const Dashboard = () => {
   const [ordersSidebarOpen, setOrdersSidebarOpen] = useState(false);
+  const { openClientDrawer } = useClientDrawer();
 
   const toggleOrdersSidebar = () => {
     setOrdersSidebarOpen(!ordersSidebarOpen);
+  };
+
+  // Mock client ID mapping
+  const handleClientSelect = (clientId: number) => {
+    openClientDrawer(clientId);
   };
 
   return (
@@ -53,7 +60,11 @@ const Dashboard = () => {
       </div>
 
       {/* Orders Sidebar */}
-      <OrdersSidebar isOpen={ordersSidebarOpen} onClose={() => setOrdersSidebarOpen(false)} />
+      <OrdersSidebar 
+        isOpen={ordersSidebarOpen} 
+        onClose={() => setOrdersSidebarOpen(false)}
+        onClientSelect={handleClientSelect}
+      />
     </AppLayout>
   );
 };

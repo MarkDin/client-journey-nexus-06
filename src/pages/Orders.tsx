@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { ArrowUpDown, Upload } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -16,8 +15,8 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 
-// Sample data - removed status field
 const initialOrders = [
   {
     id: "ORD-2025-1245",
@@ -101,10 +100,24 @@ const initialOrders = [
   },
 ];
 
+const clientIdMap: Record<string, number> = {
+  "Global Industries Inc.": 1,
+  "Tech Solutions Ltd.": 2,
+  "Premier Enterprises": 3,
+  "Acme Manufacturing": 4,
+  "Smart Systems Corp.": 5,
+  "Future Electronics": 6,
+  "Atlas Construction": 7,
+  "Pacific Shipping Co.": 8,
+  "European Imports": 9,
+  "Nordic Supplies": 10,
+};
+
 const Orders = () => {
   const [orders, setOrders] = useState(initialOrders);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { openClientDrawer } = useClientDrawer();
   
   const handleImportClick = () => {
     if (fileInputRef.current) {
@@ -116,7 +129,6 @@ const Orders = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Check if it's an Excel file
     if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls') && !file.name.endsWith('.csv')) {
       toast({
         title: "Invalid file format",
@@ -126,16 +138,21 @@ const Orders = () => {
       return;
     }
     
-    // In a real application, you would parse the Excel file here
-    // For this demo, we'll just show a success message
     toast({
       title: "Import successful",
       description: `Imported ${file.name}`,
     });
     
-    // Reset the file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+  
+  const handleClientClick = (clientName: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    const clientId = clientIdMap[clientName];
+    if (clientId) {
+      openClientDrawer(clientId);
     }
   };
   
@@ -211,7 +228,12 @@ const Orders = () => {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{order.clientName}</TableCell>
+                    <TableCell 
+                      className="text-primary hover:underline cursor-pointer"
+                      onClick={(e) => handleClientClick(order.clientName, e)}
+                    >
+                      {order.clientName}
+                    </TableCell>
                     <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right font-medium">
                       ${order.amount.toLocaleString()}

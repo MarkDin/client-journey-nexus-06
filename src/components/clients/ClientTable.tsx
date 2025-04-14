@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 
 const clients = [
   { 
@@ -132,12 +133,9 @@ const clients = [
   },
 ];
 
-interface ClientTableProps {
-  onViewClient: (clientId: number) => void;
-}
-
-export function ClientTable({ onViewClient }: ClientTableProps) {
+export function ClientTable() {
   const navigate = useNavigate();
+  const { openClientDrawer } = useClientDrawer();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
@@ -176,7 +174,7 @@ export function ClientTable({ onViewClient }: ClientTableProps) {
 
   const handleClientNameClick = (clientId: number, event: React.MouseEvent) => {
     event.stopPropagation();
-    navigate(`/clients/${clientId}`);
+    openClientDrawer(clientId);
   };
   
   return (
@@ -324,7 +322,7 @@ export function ClientTable({ onViewClient }: ClientTableProps) {
               </TableRow>
             ) : (
               filteredClients.map((client) => (
-                <TableRow key={client.id} onClick={() => onViewClient(client.id)} className="cursor-pointer">
+                <TableRow key={client.id} onClick={() => openClientDrawer(client.id)} className="cursor-pointer">
                   <TableCell 
                     className="font-medium text-primary hover:underline cursor-pointer" 
                     onClick={(e) => handleClientNameClick(client.id, e)}
