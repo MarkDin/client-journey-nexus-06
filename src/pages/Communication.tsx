@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from "react";
-import { Filter, Calendar, MessageSquare, Pencil, Mail, CheckCircle, ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Edit } from "lucide-react";
+import { Filter, Calendar, MessageSquare, Pencil, Mail, CheckCircle, ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Edit, X } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
