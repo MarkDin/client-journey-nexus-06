@@ -3,10 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   ArrowUpDown, 
-  CheckCircle2, 
-  Circle, 
   Filter, 
-  HelpCircle, 
   Search 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,8 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 
 const clients = [
@@ -37,7 +32,6 @@ const clients = [
     industry: "Manufacturing", 
     salesRep: "John Doe",
     region: "North America",
-    score: "A",
     lastOrder: "2025-06-10",
   },
   { 
@@ -46,7 +40,6 @@ const clients = [
     industry: "Technology", 
     salesRep: "Sarah Smith",
     region: "Europe",
-    score: "B",
     lastOrder: "2025-05-28",
   },
   { 
@@ -55,7 +48,6 @@ const clients = [
     industry: "Manufacturing", 
     salesRep: "Mike Johnson",
     region: "North America",
-    score: "C",
     lastOrder: "2025-04-15",
   },
   { 
@@ -64,7 +56,6 @@ const clients = [
     industry: "Technology", 
     salesRep: "Emily Brown",
     region: "Asia Pacific",
-    score: "A",
     lastOrder: "2025-06-05",
   },
   { 
@@ -73,7 +64,6 @@ const clients = [
     industry: "Retail", 
     salesRep: "John Doe",
     region: "Europe",
-    score: "B",
     lastOrder: "2025-06-02",
   },
   { 
@@ -82,7 +72,6 @@ const clients = [
     industry: "Technology", 
     salesRep: "Sarah Smith",
     region: "North America",
-    score: "A",
     lastOrder: "2025-05-30",
   },
   { 
@@ -91,7 +80,6 @@ const clients = [
     industry: "Construction", 
     salesRep: "Mike Johnson",
     region: "North America",
-    score: "D",
     lastOrder: "2025-02-18",
   },
   { 
@@ -100,7 +88,6 @@ const clients = [
     industry: "Logistics", 
     salesRep: "Emily Brown",
     region: "Asia Pacific",
-    score: "B",
     lastOrder: "2025-05-25",
   },
   { 
@@ -109,7 +96,6 @@ const clients = [
     industry: "Import/Export", 
     salesRep: "John Doe",
     region: "Europe",
-    score: "C",
     lastOrder: "2025-05-20",
   },
   { 
@@ -118,13 +104,11 @@ const clients = [
     industry: "Wholesale", 
     salesRep: "Sarah Smith",
     region: "Europe",
-    score: "B",
     lastOrder: "2025-04-10",
   },
 ];
 
 export function ClientTable() {
-  const navigate = useNavigate();
   const { openClientDrawer } = useClientDrawer();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
@@ -146,16 +130,6 @@ export function ClientTable() {
       
     return matchesSearch && matchesIndustry && matchesRegion;
   });
-  
-  const getScoreBadgeColor = (score: string) => {
-    switch (score) {
-      case "A": return "bg-success text-success-foreground";
-      case "B": return "bg-secondary text-secondary-foreground";
-      case "C": return "bg-warning text-warning-foreground";
-      case "D": return "bg-destructive text-destructive-foreground";
-      default: return "";
-    }
-  };
 
   const handleClientNameClick = (clientId: number, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -246,12 +220,6 @@ export function ClientTable() {
               <TableHead>Region</TableHead>
               <TableHead>
                 <div className="flex items-center space-x-1">
-                  <span>Score</span>
-                  <ArrowUpDown className="h-3 w-3" />
-                </div>
-              </TableHead>
-              <TableHead>
-                <div className="flex items-center space-x-1">
                   <span>Last Order</span>
                   <ArrowUpDown className="h-3 w-3" />
                 </div>
@@ -261,7 +229,7 @@ export function ClientTable() {
           <TableBody>
             {filteredClients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
                   No clients found. Try adjusting your filters.
                 </TableCell>
               </TableRow>
@@ -277,11 +245,6 @@ export function ClientTable() {
                   <TableCell>{client.industry}</TableCell>
                   <TableCell>{client.salesRep}</TableCell>
                   <TableCell>{client.region}</TableCell>
-                  <TableCell>
-                    <Badge className={cn(getScoreBadgeColor(client.score))}>
-                      {client.score}
-                    </Badge>
-                  </TableCell>
                   <TableCell>{new Date(client.lastOrder).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))
@@ -292,4 +255,3 @@ export function ClientTable() {
     </Card>
   );
 }
-
