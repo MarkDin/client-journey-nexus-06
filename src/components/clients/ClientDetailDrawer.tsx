@@ -46,7 +46,6 @@ interface ClientDetailDrawerProps {
 export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDrawerProps) {
   const [activeTab, setActiveTab] = useState("journey");
   
-  // Mock data for the client detail - in a real app, this would be fetched based on clientId
   const client = clientId ? {
     id: clientId,
     name: "Global Industries Inc.",
@@ -116,28 +115,6 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
       { quarter: "Q3 2024", value: 214000 },
       { quarter: "Q4 2024", value: 278000 },
     ],
-    attachments: [
-      { name: "Contract_2025_Renewal.pdf", date: "2025-05-12", type: "pdf", size: "1.2 MB" },
-      { name: "Product_Specifications.xlsx", date: "2025-04-28", type: "xlsx", size: "650 KB" },
-      { name: "Meeting_Notes_Q2_Review.docx", date: "2025-06-03", type: "docx", size: "320 KB" },
-      { name: "Proposal_Automation_System.pdf", date: "2025-05-30", type: "pdf", size: "2.8 MB" },
-    ],
-    alerts: [
-      { 
-        id: 1, 
-        type: "invoice", 
-        message: "Invoice #INV-2025-089 is overdue by 15 days", 
-        priority: "high",
-        date: "2025-06-05"
-      },
-      { 
-        id: 2, 
-        type: "order", 
-        message: "Recent order pattern shows 30% decrease in volume", 
-        priority: "medium",
-        date: "2025-06-02"
-      }
-    ]
   } : null;
   
   if (!client) return null;
@@ -163,32 +140,8 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
           </div>
         </SheetHeader>
         
-        <ScrollArea className="h-[calc(100vh-80px)]">
+        <ScrollArea className="h-[calc(100vh-80px)] p-4">
           <div className="p-4">
-            {client.alerts && client.alerts.length > 0 && (
-              <Card className="mb-4 border-destructive">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-destructive flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5" />
-                    Client Alerts
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {client.alerts.map(alert => (
-                      <div key={alert.id} className="text-sm flex items-start gap-2">
-                        <div className={`w-2 h-2 rounded-full mt-1.5 ${alert.priority === 'high' ? 'bg-destructive' : 'bg-amber-500'}`}></div>
-                        <div>
-                          <p>{alert.message}</p>
-                          <p className="text-xs text-muted-foreground">{new Date(alert.date).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          
             <Card className="mb-4">
               <CardContent className="p-4">
                 <div className="grid md:grid-cols-2 gap-4">
