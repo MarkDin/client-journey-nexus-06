@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Filter, Calendar, MessageSquare, Pencil, Mail, CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
+import { Filter, Calendar, MessageSquare, Pencil, Mail, CheckCircle, ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,21 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from "@/components/ui/accordion";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const weeklyThreads = [
   {
@@ -184,7 +199,7 @@ const Communication = () => {
   
   const [emailDrawerOpen, setEmailDrawerOpen] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState<any[]>([]);
-  const [currentEmailIndex, setCurrentEmailIndex] = useState(0);
+  const [expandedEmailIds, setExpandedEmailIds] = useState<number[]>([]);
   
   const handleClientClick = (clientId: number) => {
     openClientDrawer(clientId);
@@ -226,23 +241,28 @@ const Communication = () => {
   const handleViewEmailThread = (threadId: number) => {
     const emails = emailsByThreadId[threadId as keyof typeof emailsByThreadId] || [];
     setSelectedEmails(emails);
-    setCurrentEmailIndex(0);
+    // Automatically expand the first email in the thread
+    if (emails.length > 0) {
+      setExpandedEmailIds([emails[0].id]);
+    } else {
+      setExpandedEmailIds([]);
+    }
     setEmailDrawerOpen(true);
   };
   
-  const handleNextEmail = () => {
-    if (currentEmailIndex < selectedEmails.length - 1) {
-      setCurrentEmailIndex(currentEmailIndex + 1);
-    }
+  const toggleEmailExpand = (emailId: number) => {
+    setExpandedEmailIds(prevIds => {
+      if (prevIds.includes(emailId)) {
+        return prevIds.filter(id => id !== emailId);
+      } else {
+        return [...prevIds, emailId];
+      }
+    });
   };
   
-  const handlePreviousEmail = () => {
-    if (currentEmailIndex > 0) {
-      setCurrentEmailIndex(currentEmailIndex - 1);
-    }
+  const isEmailExpanded = (emailId: number) => {
+    return expandedEmailIds.includes(emailId);
   };
-  
-  const currentEmail = selectedEmails[currentEmailIndex];
   
   return (
     <AppLayout>
@@ -400,66 +420,87 @@ const Communication = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Email Thread Drawer */}
+      {/* Gmail-style Email Thread Drawer */}
       <Sheet open={emailDrawerOpen} onOpenChange={setEmailDrawerOpen}>
         <SheetContent className="w-full sm:max-w-lg md:max-w-xl">
           <SheetHeader className="mb-4">
             <SheetTitle>Email Thread</SheetTitle>
             <SheetDescription>
               {selectedEmails.length > 0 ? 
-                `Viewing email ${currentEmailIndex + 1} of ${selectedEmails.length}` : 
+                `${selectedEmails.length} emails in this thread` : 
                 "No emails found"}
             </SheetDescription>
           </SheetHeader>
           
-          {currentEmail && (
+          {selectedEmails.length > 0 && (
             <div className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <div className="flex justify-between mb-2">
-                  <h3 className="font-medium text-lg">{currentEmail.subject}</h3>
-                  <span className="text-sm text-muted-foreground">{currentEmail.date}</span>
-                </div>
-                <Separator className="my-2" />
-                <div className="space-y-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                    <div>
-                      <p className="font-medium">From: {currentEmail.from}</p>
-                      <p className="text-sm text-muted-foreground">{currentEmail.email}</p>
-                    </div>
-                    <div className="mt-2 sm:mt-0">
-                      <p>To: {currentEmail.to}</p>
-                    </div>
-                  </div>
-                </div>
+              <div className="bg-muted/50 p-3 rounded-lg">
+                <h3 className="font-medium text-lg">{selectedEmails[0].subject}</h3>
+                <p className="text-sm text-muted-foreground">Between {selectedEmails[0].from.split(" ")[0]} and {selectedEmails[0].to.split(" ")[0]}</p>
               </div>
               
-              <ScrollArea className="h-[calc(100vh-360px)] border rounded-md p-4">
-                <div className="whitespace-pre-line">
-                  {currentEmail.content}
+              <ScrollArea className="h-[calc(100vh-220px)]">
+                <div className="space-y-3">
+                  {selectedEmails.map((email, index) => (
+                    <Card key={email.id} className="border shadow-sm">
+                      <Collapsible 
+                        open={isEmailExpanded(email.id)} 
+                        onOpenChange={() => toggleEmailExpand(email.id)}
+                        className="w-full"
+                      >
+                        <div className="p-3 flex items-center justify-between hover:bg-muted/50 cursor-pointer" onClick={() => toggleEmailExpand(email.id)}>
+                          <div className="flex items-center space-x-3">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                              {email.from.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="flex items-center">
+                                <p className="font-medium">{email.from}</p>
+                                <p className="text-xs text-muted-foreground ml-2">
+                                  {email.date}
+                                </p>
+                              </div>
+                              <p className="text-sm text-muted-foreground truncate max-w-[300px]">
+                                {isEmailExpanded(email.id) ? '' : email.content.split('\n')[0]}
+                              </p>
+                            </div>
+                          </div>
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="p-0 h-8 w-8">
+                              {isEmailExpanded(email.id) ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </CollapsibleTrigger>
+                        </div>
+                        
+                        <CollapsibleContent>
+                          <Separator />
+                          <div className="p-4 pt-3">
+                            <div className="flex items-center justify-between mb-3">
+                              <div>
+                                <div className="font-medium">From: {email.from}</div>
+                                <div className="text-sm text-muted-foreground">{email.email}</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm">To: {email.to}</div>
+                              </div>
+                            </div>
+                            
+                            <div className="whitespace-pre-line border-t pt-3">
+                              {email.content}
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </Card>
+                  ))}
                 </div>
               </ScrollArea>
               
-              <SheetFooter className="flex flex-row justify-between sm:justify-between gap-2">
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handlePreviousEmail}
-                    disabled={currentEmailIndex === 0}
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Previous
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleNextEmail}
-                    disabled={currentEmailIndex === selectedEmails.length - 1}
-                  >
-                    Next
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
+              <SheetFooter>
                 <SheetClose asChild>
                   <Button variant="ghost" size="sm">Close</Button>
                 </SheetClose>
