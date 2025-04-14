@@ -135,23 +135,6 @@ const Shipments = () => {
   let title = "Shipment Volume by Product";
   let subtitle = "";
   
-  if (drillLevel === "country") {
-    chartData = countryShipmentData[selectedProduct] || [];
-    xAxisDataKey = "country";
-    title = "Shipment Volume by Country";
-    subtitle = `Product: ${selectedProduct}`;
-  } else if (drillLevel === "region") {
-    chartData = regionShipmentData[selectedCountry] || [];
-    xAxisDataKey = "region";
-    title = "Shipment Volume by Region";
-    subtitle = `Product: ${selectedProduct} / Country: ${selectedCountry}`;
-  } else if (drillLevel === "client") {
-    chartData = clientShipmentData[selectedRegion] || [];
-    xAxisDataKey = "client";
-    title = "Shipment Volume by Client";
-    subtitle = `Product: ${selectedProduct} / Country: ${selectedCountry} / Region: ${selectedRegion}`;
-  }
-  
   const currentTotal = chartData.reduce((sum, item) => sum + item.value, 0);
   const previousTotal = chartData.reduce((sum, item) => sum + item.previousYear, 0);
   const yoyChange = previousTotal > 0 
@@ -172,13 +155,6 @@ const Shipments = () => {
               <CardTitle>{title}</CardTitle>
               {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
             </div>
-            
-            {drillLevel !== "product" && (
-              <Button variant="outline" size="sm" onClick={handleDrillUp}>
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back
-              </Button>
-            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -194,10 +170,6 @@ const Shipments = () => {
                 </p>
               </div>
             </div>
-            
-            <p className="text-sm text-muted-foreground mt-2 md:mt-0">
-              {drillLevel === "client" ? "Click on client names to view details" : "Click on bars to drill down"}
-            </p>
           </div>
           
           <div className="h-[400px] mt-6">
@@ -231,11 +203,6 @@ const Shipments = () => {
                   dataKey="value" 
                   name="Current Year" 
                   fill="hsl(var(--primary))" 
-                  onClick={drillLevel === "client" 
-                    ? (data) => handleClientClick(data.client) 
-                    : handleDrillDown
-                  }
-                  cursor="pointer"
                 />
                 <Bar 
                   dataKey="previousYear" 
