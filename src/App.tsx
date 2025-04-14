@@ -13,7 +13,6 @@ import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 import Shipments from "./pages/Shipments";
 import Communication from "./pages/Communication";
-import UserAnalytics from "./pages/Users";
 import Support from "./pages/Support";
 import { ClientDrawerProvider } from "@/contexts/ClientDrawerContext";
 import { ClientDetailDrawer } from "@/components/clients/ClientDetailDrawer";
@@ -34,7 +33,6 @@ const AppWithClientDrawer = () => {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/shipments" element={<Shipments />} />
         <Route path="/communication" element={<Communication />} />
-        <Route path="/users" element={<UserAnalytics />} />
         <Route path="/support" element={<Support />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
@@ -50,20 +48,24 @@ const AppWithClientDrawer = () => {
   );
 };
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ClientDrawerProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppWithClientDrawer />
-        </BrowserRouter>
-      </ClientDrawerProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+// Fix: Move the QueryClient instance inside the function component
+const App = () => {
+  // Create the client instance inside the component
+  const queryClient = new QueryClient();
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ClientDrawerProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppWithClientDrawer />
+          </BrowserRouter>
+        </ClientDrawerProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
