@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   X, 
@@ -36,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { OrderTrendChart } from "@/components/clients/OrderTrendChart";
 
 interface ClientDetailDrawerProps {
   clientId: number | null;
@@ -321,30 +321,9 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
               </TabsContent>
               
               <TabsContent value="orders" className="mt-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle>Quarterly Order Volume</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px]">
-                      {/* Order history chart - simplified visualization */}
-                      <div className="h-full flex items-end justify-between gap-2">
-                        {client.orderHistory.map((quarter) => (
-                          <div key={quarter.quarter} className="flex flex-col items-center gap-2">
-                            <div 
-                              className="bg-primary w-16 rounded-t-md" 
-                              style={{ height: `${(quarter.value / 350000) * 100}%` }}
-                            ></div>
-                            <div className="text-xs font-medium">{quarter.quarter}</div>
-                            <div className="text-xs text-muted-foreground">${(quarter.value / 1000).toFixed(0)}K</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <OrderTrendChart clientName={client.name} className="mb-4" />
                 
-                <Card className="mt-4">
+                <Card>
                   <CardHeader className="pb-2 flex items-center justify-between">
                     <CardTitle>Recent Orders</CardTitle>
                     <Button variant="outline" size="sm" className="gap-1">

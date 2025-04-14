@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { OrderTrendChart } from "@/components/clients/OrderTrendChart";
 
 const ClientDetails = () => {
   const { id } = useParams<{id: string}>();
@@ -296,28 +297,7 @@ const ClientDetails = () => {
             </TabsContent>
             
             <TabsContent value="history" className="mt-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle>Order History (2025)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    {/* Order history chart would go here - simplified for now */}
-                    <div className="h-full flex items-end justify-between gap-2">
-                      {client.orderHistory.map((month) => (
-                        <div key={month.month} className="flex flex-col items-center gap-2">
-                          <div 
-                            className="bg-primary w-12 rounded-t-md" 
-                            style={{ height: `${(month.value / 125000) * 100}%` }}
-                          ></div>
-                          <div className="text-xs font-medium">{month.month}</div>
-                          <div className="text-xs text-muted-foreground">${(month.value / 1000).toFixed(0)}K</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <OrderTrendChart clientName={client.name} />
             </TabsContent>
           </Tabs>
         </div>
