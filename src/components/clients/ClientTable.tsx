@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -6,8 +7,7 @@ import {
   Circle, 
   Filter, 
   HelpCircle, 
-  Search, 
-  XCircle 
+  Search 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -38,7 +38,6 @@ const clients = [
     salesRep: "John Doe",
     region: "North America",
     score: "A",
-    status: "active",
     lastOrder: "2025-06-10",
   },
   { 
@@ -48,7 +47,6 @@ const clients = [
     salesRep: "Sarah Smith",
     region: "Europe",
     score: "B",
-    status: "active",
     lastOrder: "2025-05-28",
   },
   { 
@@ -58,7 +56,6 @@ const clients = [
     salesRep: "Mike Johnson",
     region: "North America",
     score: "C",
-    status: "inactive",
     lastOrder: "2025-04-15",
   },
   { 
@@ -68,7 +65,6 @@ const clients = [
     salesRep: "Emily Brown",
     region: "Asia Pacific",
     score: "A",
-    status: "active",
     lastOrder: "2025-06-05",
   },
   { 
@@ -78,7 +74,6 @@ const clients = [
     salesRep: "John Doe",
     region: "Europe",
     score: "B",
-    status: "active",
     lastOrder: "2025-06-02",
   },
   { 
@@ -88,7 +83,6 @@ const clients = [
     salesRep: "Sarah Smith",
     region: "North America",
     score: "A",
-    status: "active",
     lastOrder: "2025-05-30",
   },
   { 
@@ -98,7 +92,6 @@ const clients = [
     salesRep: "Mike Johnson",
     region: "North America",
     score: "D",
-    status: "inactive",
     lastOrder: "2025-02-18",
   },
   { 
@@ -108,7 +101,6 @@ const clients = [
     salesRep: "Emily Brown",
     region: "Asia Pacific",
     score: "B",
-    status: "active",
     lastOrder: "2025-05-25",
   },
   { 
@@ -118,7 +110,6 @@ const clients = [
     salesRep: "John Doe",
     region: "Europe",
     score: "C",
-    status: "active",
     lastOrder: "2025-05-20",
   },
   { 
@@ -128,7 +119,6 @@ const clients = [
     salesRep: "Sarah Smith",
     region: "Europe",
     score: "B",
-    status: "inactive",
     lastOrder: "2025-04-10",
   },
 ];
@@ -139,7 +129,6 @@ export function ClientTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   
   const industries = Array.from(new Set(clients.map(client => client.industry)));
   const regions = Array.from(new Set(clients.map(client => client.region)));
@@ -155,11 +144,7 @@ export function ClientTable() {
     const matchesRegion = selectedRegions.length === 0 || 
       selectedRegions.includes(client.region);
       
-    const matchesStatus = selectedStatuses.length === 0 || 
-      (selectedStatuses.includes("active") && client.status === "active") ||
-      (selectedStatuses.includes("inactive") && client.status === "inactive");
-      
-    return matchesSearch && matchesIndustry && matchesRegion && matchesStatus;
+    return matchesSearch && matchesIndustry && matchesRegion;
   });
   
   const getScoreBadgeColor = (score: string) => {
@@ -247,45 +232,6 @@ export function ClientTable() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-10">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Status
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuCheckboxItem
-                  checked={selectedStatuses.includes("active")}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setSelectedStatuses([...selectedStatuses, "active"]);
-                    } else {
-                      setSelectedStatuses(
-                        selectedStatuses.filter((s) => s !== "active")
-                      );
-                    }
-                  }}
-                >
-                  Active
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={selectedStatuses.includes("inactive")}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setSelectedStatuses([...selectedStatuses, "inactive"]);
-                    } else {
-                      setSelectedStatuses(
-                        selectedStatuses.filter((s) => s !== "inactive")
-                      );
-                    }
-                  }}
-                >
-                  Inactive
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -304,7 +250,6 @@ export function ClientTable() {
                   <ArrowUpDown className="h-3 w-3" />
                 </div>
               </TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>
                 <div className="flex items-center space-x-1">
                   <span>Last Order</span>
@@ -316,7 +261,7 @@ export function ClientTable() {
           <TableBody>
             {filteredClients.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
                   No clients found. Try adjusting your filters.
                 </TableCell>
               </TableRow>
@@ -337,21 +282,6 @@ export function ClientTable() {
                       {client.score}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      {client.status === "active" ? (
-                        <>
-                          <CheckCircle2 className="h-4 w-4 text-success" />
-                          <span>Active</span>
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="h-4 w-4 text-destructive" />
-                          <span>Inactive</span>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
                   <TableCell>{new Date(client.lastOrder).toLocaleDateString()}</TableCell>
                 </TableRow>
               ))
@@ -362,3 +292,4 @@ export function ClientTable() {
     </Card>
   );
 }
+
