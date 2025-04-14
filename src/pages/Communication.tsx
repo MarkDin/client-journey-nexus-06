@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Filter, Calendar, MessageSquare, Pencil, Mail, CheckCircle, ArrowLeft, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Filter, Calendar, MessageSquare, Pencil, Mail, CheckCircle, ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Edit } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,6 +45,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { 
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
 const weeklyThreads = [
   {
@@ -162,7 +171,8 @@ const clientSummaries = [
       "45% growth in order value since 2023",
       "Interested in automation solutions",
       "Planning production line expansion"
-    ]
+    ],
+    edited: false
   },
   {
     clientId: 2,
@@ -173,7 +183,8 @@ const clientSummaries = [
       "Rapid scaling after successful pilots",
       "European expansion plans",
       "Prioritizes integration support"
-    ]
+    ],
+    edited: false
   },
   {
     clientId: 3,
@@ -184,7 +195,8 @@ const clientSummaries = [
       "Price sensitive, seeks discounts",
       "Provided valuable product feedback",
       "Interest in premium product line"
-    ]
+    ],
+    edited: false
   }
 ];
 
@@ -201,6 +213,12 @@ const Communication = () => {
   const [selectedEmails, setSelectedEmails] = useState<any[]>([]);
   const [expandedEmailIds, setExpandedEmailIds] = useState<number[]>([]);
   
+  const [localClientSummaries, setLocalClientSummaries] = useState(clientSummaries);
+  const [insightEditDialogOpen, setInsightEditDialogOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [editedClientSummary, setEditedClientSummary] = useState("");
+  const [editedInsights, setEditedInsights] = useState<string[]>([]);
+  
   const handleClientClick = (clientId: number) => {
     openClientDrawer(clientId);
   };
@@ -215,7 +233,6 @@ const Communication = () => {
   const handleSaveSummary = () => {
     if (!selectedThread) return;
     
-    // Update the thread in our local state
     const updatedThreads = localThreads.map(thread => {
       if (thread.id === selectedThread.id) {
         return {
@@ -231,17 +248,62 @@ const Communication = () => {
     setLocalThreads(updatedThreads);
     setEditDialogOpen(false);
     
-    // Show success toast
     toast({
       title: "Summary updated",
       description: "The client communication summary has been updated successfully.",
     });
   };
   
+  const handleEditClientInsight = (client: any) => {
+    setSelectedClient(client);
+    setEditedClientSummary(client.summary);
+    setEditedInsights([...client.keyInsights]);
+    setInsightEditDialogOpen(true);
+  };
+  
+  const handleSaveClientInsight = () => {
+    if (!selectedClient) return;
+    
+    const updatedClientSummaries = localClientSummaries.map(client => {
+      if (client.clientId === selectedClient.clientId) {
+        return {
+          ...client,
+          summary: editedClientSummary,
+          keyInsights: editedInsights.filter(insight => insight.trim() !== ""),
+          edited: true
+        };
+      }
+      return client;
+    });
+    
+    setLocalClientSummaries(updatedClientSummaries);
+    setInsightEditDialogOpen(false);
+    
+    toast({
+      title: "Client insight updated",
+      description: "The AI-generated client insight has been updated successfully.",
+    });
+  };
+  
+  const handleAddInsight = () => {
+    setEditedInsights([...editedInsights, ""]);
+  };
+  
+  const handleInsightChange = (index: number, value: string) => {
+    const newInsights = [...editedInsights];
+    newInsights[index] = value;
+    setEditedInsights(newInsights);
+  };
+  
+  const handleRemoveInsight = (index: number) => {
+    const newInsights = [...editedInsights];
+    newInsights.splice(index, 1);
+    setEditedInsights(newInsights);
+  };
+  
   const handleViewEmailThread = (threadId: number) => {
     const emails = emailsByThreadId[threadId as keyof typeof emailsByThreadId] || [];
     setSelectedEmails(emails);
-    // Automatically expand the first email in the thread
     if (emails.length > 0) {
       setExpandedEmailIds([emails[0].id]);
     } else {
@@ -334,17 +396,26 @@ const Communication = () => {
         </TabsContent>
         
         <TabsContent value="ai-summary" className="space-y-4">
-          {clientSummaries.map((client) => (
+          {localClientSummaries.map((client) => (
             <Card key={client.clientId}>
               <CardHeader className="pb-2">
-                <CardTitle>
-                  <span 
-                    className="text-primary hover:underline cursor-pointer"
-                    onClick={() => handleClientClick(client.clientId)}
-                  >
-                    {client.clientName}
-                  </span>
-                </CardTitle>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <CardTitle>
+                    <span 
+                      className="text-primary hover:underline cursor-pointer"
+                      onClick={() => handleClientClick(client.clientId)}
+                    >
+                      {client.clientName}
+                    </span>
+                    {client.edited && (
+                      <Badge variant="outline" className="ml-2">Edited</Badge>
+                    )}
+                  </CardTitle>
+                  <Button variant="outline" size="sm" onClick={() => handleEditClientInsight(client)}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Insight
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground italic">{client.summary}</p>
@@ -380,7 +451,6 @@ const Communication = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Edit Summary Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -420,7 +490,67 @@ const Communication = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Gmail-style Email Thread Drawer */}
+      <Dialog open={insightEditDialogOpen} onOpenChange={setInsightEditDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Client Insight</DialogTitle>
+            <DialogDescription>
+              Make changes to the AI-generated insight for {selectedClient?.clientName}.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="client-summary">Client Summary</Label>
+              <Textarea
+                id="client-summary"
+                className="min-h-[120px]"
+                value={editedClientSummary}
+                onChange={(e) => setEditedClientSummary(e.target.value)}
+                placeholder="Enter client summary"
+              />
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="key-insights">Key Insights</Label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleAddInsight}
+                >
+                  Add Insight
+                </Button>
+              </div>
+              
+              {editedInsights.map((insight, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input
+                    value={insight}
+                    onChange={(e) => handleInsightChange(index, e.target.value)}
+                    placeholder="Enter key insight"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => handleRemoveInsight(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setInsightEditDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveClientInsight}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
       <Sheet open={emailDrawerOpen} onOpenChange={setEmailDrawerOpen}>
         <SheetContent className="w-full sm:max-w-lg md:max-w-xl">
           <SheetHeader className="mb-4">
