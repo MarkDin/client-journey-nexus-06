@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
@@ -8,10 +9,10 @@ import {
   BarChart2, 
   Truck, 
   Mail, 
-  ShieldQuestion, 
   User, 
   ChevronRight, 
-  Menu 
+  Menu,
+  ShieldQuestion // Keeping the existing icon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ export function AppSidebar() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const location = useLocation();
   
-  const menu = [
+  const mainMenu = [
     { 
       name: "Dashboard", 
       href: "/", 
@@ -64,12 +65,7 @@ export function AppSidebar() {
       name: "Analytics", 
       href: "/analytics", 
       icon: <BarChart2 className="h-5 w-5" /> 
-    },
-    { 
-      name: "Help & Support", 
-      href: "/support", 
-      icon: <ShieldQuestion className="h-5 w-5" /> 
-    },
+    }
   ];
   
   const toggleCollapse = () => {
@@ -110,7 +106,11 @@ export function AppSidebar() {
           
           <ScrollArea className="flex-1 h-[calc(100vh-4rem)]">
             <div className="p-3">
-              {menu.map((item) => (
+              {[...mainMenu, { 
+                name: "Help & Support", 
+                href: "/support", 
+                icon: <ShieldQuestion className="h-5 w-5" /> 
+              }].map((item) => (
                 <NavLink
                   key={item.href}
                   to={item.href}
@@ -154,24 +154,44 @@ export function AppSidebar() {
       </div>
       
       <ScrollArea className="flex-1 h-[calc(100vh-4rem)]">
-        <div className="p-3">
-          {menu.map((item) => (
+        <div className="p-3 flex flex-col h-full">
+          <div>
+            {mainMenu.map((item) => (
+              <NavLink
+                key={item.href}
+                to={item.href}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground mb-1",
+                    isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+                    isCollapsed && "justify-center"
+                  )
+                }
+                title={isCollapsed ? item.name : undefined}
+              >
+                {item.icon}
+                {!isCollapsed && <span>{item.name}</span>}
+              </NavLink>
+            ))}
+          </div>
+          
+          {/* Help & Support item at the bottom */}
+          <div className="mt-auto mb-4">
             <NavLink
-              key={item.href}
-              to={item.href}
+              to="/support"
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground mb-1",
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
                   isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
                   isCollapsed && "justify-center"
                 )
               }
-              title={isCollapsed ? item.name : undefined}
+              title={isCollapsed ? "Help & Support" : undefined}
             >
-              {item.icon}
-              {!isCollapsed && <span>{item.name}</span>}
+              <ShieldQuestion className="h-5 w-5" />
+              {!isCollapsed && <span>Help & Support</span>}
             </NavLink>
-          ))}
+          </div>
         </div>
       </ScrollArea>
     </div>
