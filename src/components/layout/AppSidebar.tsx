@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
@@ -9,7 +8,6 @@ import {
   BarChart2, 
   Truck, 
   Mail, 
-  User, 
   ChevronRight, 
   Menu,
   HelpCircle
@@ -55,11 +53,6 @@ export function AppSidebar() {
       name: "Communication", 
       href: "/communication", 
       icon: <Mail className="h-5 w-5" /> 
-    },
-    { 
-      name: "Users", 
-      href: "/users", 
-      icon: <User className="h-5 w-5" /> 
     },
     { 
       name: "Analytics", 
@@ -211,4 +204,3 @@ export function AppSidebar() {
     </div>
   );
 }
-
