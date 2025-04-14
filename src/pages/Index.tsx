@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { DollarSign, Package, PercentCircle } from "lucide-react";
+import { DollarSign, Package, PercentCircle, Filter, ArrowRight } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatsCard } from "@/components/dashboard/StatsCard";
@@ -8,6 +9,7 @@ import { OrdersSidebar } from "@/components/dashboard/OrdersSidebar";
 import { GoalCompletionChart } from "@/components/dashboard/GoalCompletionChart";
 import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 import { SideDrawerButton } from "@/components/ui/side-drawer-button";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,

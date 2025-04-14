@@ -1,11 +1,10 @@
 
 import { useState, useRef, useEffect } from "react";
-import { ArrowUpDown, Upload, Search, Filter, Download, PlusCircle, Trash2 } from "lucide-react";
+import { ArrowUpDown, Upload, Search, Filter, Download, PlusCircle } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -28,7 +27,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 
@@ -40,8 +38,6 @@ const initialOrders = [
     date: "2025-06-10",
     amount: 125000,
     products: "Industrial Sensors X-5200",
-    status: "Processing",
-    unusual: false,
   },
   {
     id: "ORD-2025-1244",
@@ -50,8 +46,6 @@ const initialOrders = [
     date: "2025-06-09",
     amount: 85000,
     products: "Smart Control Systems",
-    status: "Processing",
-    unusual: true,
   },
   {
     id: "ORD-2025-1243",
@@ -60,8 +54,6 @@ const initialOrders = [
     date: "2025-06-08",
     amount: 45000,
     products: "Manufacturing Tools Kit",
-    status: "Shipped",
-    unusual: false,
   },
   {
     id: "ORD-2025-1242",
@@ -70,8 +62,6 @@ const initialOrders = [
     date: "2025-06-07",
     amount: 67000,
     products: "Heavy Machinery Parts",
-    status: "Delivered",
-    unusual: false,
   },
   {
     id: "ORD-2025-1241",
@@ -80,8 +70,6 @@ const initialOrders = [
     date: "2025-06-06",
     amount: 92000,
     products: "Enterprise Software License",
-    status: "Delivered",
-    unusual: false,
   },
   {
     id: "ORD-2025-1240",
@@ -90,8 +78,6 @@ const initialOrders = [
     date: "2025-06-05",
     amount: 38000,
     products: "Industrial Sensors X-5200",
-    status: "Shipped",
-    unusual: false,
   },
   {
     id: "ORD-2025-1239",
@@ -100,8 +86,6 @@ const initialOrders = [
     date: "2025-06-05",
     amount: 56000,
     products: "Heavy Machinery Parts",
-    status: "Delivered",
-    unusual: false,
   },
   {
     id: "ORD-2025-1238",
@@ -110,8 +94,6 @@ const initialOrders = [
     date: "2025-06-04",
     amount: 74000,
     products: "Smart Control Systems",
-    status: "Shipped",
-    unusual: false,
   },
   {
     id: "ORD-2025-1237",
@@ -120,8 +102,6 @@ const initialOrders = [
     date: "2025-06-03",
     amount: 61000,
     products: "Manufacturing Tools Kit",
-    status: "Delivered",
-    unusual: false,
   },
   {
     id: "ORD-2025-1236",
@@ -130,8 +110,6 @@ const initialOrders = [
     date: "2025-06-02",
     amount: 115000,
     products: "Enterprise Software License",
-    status: "Cancelled",
-    unusual: true,
   },
 ];
 
@@ -139,7 +117,6 @@ const Orders = () => {
   const [orders, setOrders] = useState(initialOrders);
   const [filteredOrders, setFilteredOrders] = useState(initialOrders);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<{ field: string; direction: 'asc' | 'desc' }>({ 
     field: 'date', direction: 'desc' 
   });
@@ -149,7 +126,7 @@ const Orders = () => {
   const { openClientDrawer } = useClientDrawer();
   
   useEffect(() => {
-    // Filter and sort orders based on search query, selected statuses, and sort order
+    // Filter and sort orders based on search query and sort order
     let result = [...orders];
     
     // Apply search filter
@@ -160,11 +137,6 @@ const Orders = () => {
         order.clientName.toLowerCase().includes(query) ||
         order.products.toLowerCase().includes(query)
       );
-    }
-    
-    // Apply status filter
-    if (selectedStatuses.length > 0) {
-      result = result.filter(order => selectedStatuses.includes(order.status));
     }
     
     // Apply sorting
@@ -191,7 +163,7 @@ const Orders = () => {
     });
     
     setFilteredOrders(result);
-  }, [orders, searchQuery, selectedStatuses, sortOrder]);
+  }, [orders, searchQuery, sortOrder]);
   
   const handleImportClick = () => {
     if (fileInputRef.current) {
@@ -232,16 +204,6 @@ const Orders = () => {
       field,
       direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
-  };
-  
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'Processing': return 'outline';
-      case 'Shipped': return 'secondary';
-      case 'Delivered': return 'default';
-      case 'Cancelled': return 'destructive';
-      default: return 'outline';
-    }
   };
   
   return (
@@ -285,33 +247,10 @@ const Orders = () => {
                 />
               </div>
               
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-10">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Status
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-40">
-                  {['Processing', 'Shipped', 'Delivered', 'Cancelled'].map((status) => (
-                    <DropdownMenuCheckboxItem
-                      key={status}
-                      checked={selectedStatuses.includes(status)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedStatuses([...selectedStatuses, status]);
-                        } else {
-                          setSelectedStatuses(
-                            selectedStatuses.filter((s) => s !== status)
-                          );
-                        }
-                      }}
-                    >
-                      {status}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button variant="outline" size="sm" className="h-10">
+                <Filter className="h-4 w-4 mr-2" />
+                Filter
+              </Button>
               
               <Button variant="outline" size="sm" className="h-10">
                 <Download className="h-4 w-4 mr-2" />
@@ -344,7 +283,6 @@ const Orders = () => {
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead className="text-right">
                   <div 
                     className="flex items-center space-x-1 justify-end cursor-pointer"
@@ -360,7 +298,7 @@ const Orders = () => {
             <TableBody>
               {filteredOrders.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
                     No orders found. Try adjusting your filters.
                   </TableCell>
                 </TableRow>
@@ -368,12 +306,7 @@ const Orders = () => {
                 filteredOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {order.id}
-                        {order.unusual && (
-                          <Badge variant="destructive">Alert</Badge>
-                        )}
-                      </div>
+                      {order.id}
                     </TableCell>
                     <TableCell 
                       className="text-primary hover:underline cursor-pointer"
@@ -382,11 +315,6 @@ const Orders = () => {
                       {order.clientName}
                     </TableCell>
                     <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusBadgeVariant(order.status)}>
-                        {order.status}
-                      </Badge>
-                    </TableCell>
                     <TableCell className="text-right font-medium">
                       ${order.amount.toLocaleString()}
                     </TableCell>
