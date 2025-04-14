@@ -1,23 +1,33 @@
 
 import { useState } from "react";
-import { DollarSign, Package, PercentCircle } from "lucide-react";
+import { DollarSign, Package, PercentCircle, Plus, Filter, ArrowRight } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TrendChart } from "@/components/dashboard/TrendChart";
 import { OrdersSidebar } from "@/components/dashboard/OrdersSidebar";
 import { GoalCompletionChart } from "@/components/dashboard/GoalCompletionChart";
+import { Button } from "@/components/ui/button";
 import { useClientDrawer } from "@/contexts/ClientDrawerContext";
+import { SideDrawerButton } from "@/components/ui/side-drawer-button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Dashboard = () => {
   const [ordersSidebarOpen, setOrdersSidebarOpen] = useState(false);
+  const [selectedView, setSelectedView] = useState("amount");
   const { openClientDrawer } = useClientDrawer();
 
   const toggleOrdersSidebar = () => {
     setOrdersSidebarOpen(!ordersSidebarOpen);
   };
 
-  // Mock client ID mapping
   const handleClientSelect = (clientId: number) => {
     openClientDrawer(clientId);
   };
@@ -26,8 +36,25 @@ const Dashboard = () => {
     <AppLayout>
       <PageHeader 
         title="Sales Dashboard" 
-        description="Your sales performance at a glance" 
-      />
+        description="Your sales performance at a glance"
+      >
+        <div className="flex gap-2">
+          <Select value={selectedView} onValueChange={setSelectedView}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="View Mode" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="amount">Order Amount</SelectItem>
+              <SelectItem value="count">Order Count</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Button>
+            <Plus className="h-4 w-4 mr-1.5" />
+            New Report
+          </Button>
+        </div>
+      </PageHeader>
       
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
@@ -53,11 +80,55 @@ const Dashboard = () => {
         />
       </div>
       
-      {/* Charts */}
+      {/* Main Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <TrendChart className="w-full" />
-        <GoalCompletionChart className="w-full" />
+        <Card>
+          <CardHeader className="pb-2 flex items-center justify-between">
+            <CardTitle>Monthly {selectedView === "amount" ? "Sales" : "Orders"}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TrendChart className="w-full" />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2 flex items-center justify-between">
+            <CardTitle>Goal Completion</CardTitle>
+            <SideDrawerButton 
+              onClick={() => toggleOrdersSidebar()} 
+              variant="outline" 
+              size="sm"
+            >
+              View Details
+            </SideDrawerButton>
+          </CardHeader>
+          <CardContent>
+            <GoalCompletionChart className="w-full" />
+          </CardContent>
+        </Card>
       </div>
+      
+      {/* Product Shipment Analysis */}
+      <Card className="mb-6">
+        <CardHeader className="pb-2 flex items-center justify-between">
+          <CardTitle>Product Shipment Analysis</CardTitle>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Filter className="h-4 w-4 mr-1.5" />
+              Filter
+            </Button>
+            <Button variant="outline" size="sm">
+              <ArrowRight className="h-4 w-4 mr-1.5" />
+              Full Report
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 w-full flex items-center justify-center text-muted-foreground">
+            Monthly shipment data visualization will appear here
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Orders Sidebar */}
       <OrdersSidebar 

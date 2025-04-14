@@ -1,10 +1,18 @@
-import { useState, useRef } from "react";
-import { ArrowUpDown, Upload } from "lucide-react";
+
+import { useState, useRef, useEffect } from "react";
+import { ArrowUpDown, Upload, Search, Filter, Download, PlusCircle, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -13,6 +21,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useClientDrawer } from "@/contexts/ClientDrawerContext";
@@ -21,103 +36,162 @@ const initialOrders = [
   {
     id: "ORD-2025-1245",
     clientName: "Global Industries Inc.",
+    clientId: 1,
     date: "2025-06-10",
     amount: 125000,
     products: "Industrial Sensors X-5200",
+    status: "Processing",
     unusual: false,
   },
   {
     id: "ORD-2025-1244",
     clientName: "Tech Solutions Ltd.",
+    clientId: 2,
     date: "2025-06-09",
     amount: 85000,
     products: "Smart Control Systems",
+    status: "Processing",
     unusual: true,
   },
   {
     id: "ORD-2025-1243",
     clientName: "Premier Enterprises",
+    clientId: 3,
     date: "2025-06-08",
     amount: 45000,
     products: "Manufacturing Tools Kit",
+    status: "Shipped",
     unusual: false,
   },
   {
     id: "ORD-2025-1242",
     clientName: "Acme Manufacturing",
+    clientId: 4,
     date: "2025-06-07",
     amount: 67000,
     products: "Heavy Machinery Parts",
+    status: "Delivered",
     unusual: false,
   },
   {
     id: "ORD-2025-1241",
     clientName: "Smart Systems Corp.",
+    clientId: 5,
     date: "2025-06-06",
     amount: 92000,
     products: "Enterprise Software License",
+    status: "Delivered",
     unusual: false,
   },
   {
     id: "ORD-2025-1240",
     clientName: "Future Electronics",
+    clientId: 6,
     date: "2025-06-05",
     amount: 38000,
     products: "Industrial Sensors X-5200",
+    status: "Shipped",
     unusual: false,
   },
   {
     id: "ORD-2025-1239",
     clientName: "Atlas Construction",
+    clientId: 7,
     date: "2025-06-05",
     amount: 56000,
     products: "Heavy Machinery Parts",
+    status: "Delivered",
     unusual: false,
   },
   {
     id: "ORD-2025-1238",
     clientName: "Pacific Shipping Co.",
+    clientId: 8,
     date: "2025-06-04",
     amount: 74000,
     products: "Smart Control Systems",
+    status: "Shipped",
     unusual: false,
   },
   {
     id: "ORD-2025-1237",
     clientName: "European Imports",
+    clientId: 9,
     date: "2025-06-03",
     amount: 61000,
     products: "Manufacturing Tools Kit",
+    status: "Delivered",
     unusual: false,
   },
   {
     id: "ORD-2025-1236",
     clientName: "Nordic Supplies",
+    clientId: 10,
     date: "2025-06-02",
     amount: 115000,
     products: "Enterprise Software License",
+    status: "Cancelled",
     unusual: true,
   },
 ];
 
-const clientIdMap: Record<string, number> = {
-  "Global Industries Inc.": 1,
-  "Tech Solutions Ltd.": 2,
-  "Premier Enterprises": 3,
-  "Acme Manufacturing": 4,
-  "Smart Systems Corp.": 5,
-  "Future Electronics": 6,
-  "Atlas Construction": 7,
-  "Pacific Shipping Co.": 8,
-  "European Imports": 9,
-  "Nordic Supplies": 10,
-};
-
 const Orders = () => {
   const [orders, setOrders] = useState(initialOrders);
+  const [filteredOrders, setFilteredOrders] = useState(initialOrders);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [sortOrder, setSortOrder] = useState<{ field: string; direction: 'asc' | 'desc' }>({ 
+    field: 'date', direction: 'desc' 
+  });
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { openClientDrawer } = useClientDrawer();
+  
+  useEffect(() => {
+    // Filter and sort orders based on search query, selected statuses, and sort order
+    let result = [...orders];
+    
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(order => 
+        order.id.toLowerCase().includes(query) ||
+        order.clientName.toLowerCase().includes(query) ||
+        order.products.toLowerCase().includes(query)
+      );
+    }
+    
+    // Apply status filter
+    if (selectedStatuses.length > 0) {
+      result = result.filter(order => selectedStatuses.includes(order.status));
+    }
+    
+    // Apply sorting
+    result.sort((a, b) => {
+      const field = sortOrder.field;
+      
+      if (field === 'date') {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return sortOrder.direction === 'asc' ? dateA - dateB : dateB - dateA;
+      }
+      
+      if (field === 'amount') {
+        return sortOrder.direction === 'asc' ? a.amount - b.amount : b.amount - a.amount;
+      }
+      
+      // Default to string comparison for other fields
+      const valueA = String(a[field as keyof typeof a]).toLowerCase();
+      const valueB = String(b[field as keyof typeof b]).toLowerCase();
+      
+      return sortOrder.direction === 'asc' 
+        ? valueA.localeCompare(valueB)
+        : valueB.localeCompare(valueA);
+    });
+    
+    setFilteredOrders(result);
+  }, [orders, searchQuery, selectedStatuses, sortOrder]);
   
   const handleImportClick = () => {
     if (fileInputRef.current) {
@@ -148,11 +222,25 @@ const Orders = () => {
     }
   };
   
-  const handleClientClick = (clientName: string, event: React.MouseEvent) => {
+  const handleClientClick = (clientId: number, event: React.MouseEvent) => {
     event.stopPropagation();
-    const clientId = clientIdMap[clientName];
-    if (clientId) {
-      openClientDrawer(clientId);
+    openClientDrawer(clientId);
+  };
+  
+  const handleSortClick = (field: string) => {
+    setSortOrder(prev => ({
+      field,
+      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+  
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'Processing': return 'outline';
+      case 'Shipped': return 'secondary';
+      case 'Delivered': return 'default';
+      case 'Cancelled': return 'destructive';
+      default: return 'outline';
     }
   };
   
@@ -162,7 +250,7 @@ const Orders = () => {
         title="Order Management" 
         description="Monitor and manage all orders"
       >
-        <div>
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="file"
             ref={fileInputRef}
@@ -172,15 +260,64 @@ const Orders = () => {
           />
           <Button variant="outline" onClick={handleImportClick}>
             <Upload className="h-4 w-4 mr-2" />
-            Import from Excel
+            Import
+          </Button>
+          <Button>
+            <PlusCircle className="h-4 w-4 mr-2" />
+            New Order
           </Button>
         </div>
       </PageHeader>
       
       <Card>
         <div className="p-4 border-b">
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
             <h3 className="font-medium">Order List</h3>
+            
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-64">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search orders..."
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-10">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Status
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  {['Processing', 'Shipped', 'Delivered', 'Cancelled'].map((status) => (
+                    <DropdownMenuCheckboxItem
+                      key={status}
+                      checked={selectedStatuses.includes(status)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedStatuses([...selectedStatuses, status]);
+                        } else {
+                          setSelectedStatuses(
+                            selectedStatuses.filter((s) => s !== status)
+                          );
+                        }
+                      }}
+                    >
+                      {status}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <Button variant="outline" size="sm" className="h-10">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
           </div>
         </div>
         
@@ -189,20 +326,30 @@ const Orders = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>
-                  <div className="flex items-center space-x-1">
+                  <div 
+                    className="flex items-center space-x-1 cursor-pointer"
+                    onClick={() => handleSortClick('id')}
+                  >
                     <span>Order ID</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </TableHead>
                 <TableHead>Client Name</TableHead>
                 <TableHead>
-                  <div className="flex items-center space-x-1">
+                  <div 
+                    className="flex items-center space-x-1 cursor-pointer"
+                    onClick={() => handleSortClick('date')}
+                  >
                     <span>Date</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </TableHead>
+                <TableHead>Status</TableHead>
                 <TableHead className="text-right">
-                  <div className="flex items-center space-x-1 justify-end">
+                  <div 
+                    className="flex items-center space-x-1 justify-end cursor-pointer"
+                    onClick={() => handleSortClick('amount')}
+                  >
                     <span>Amount</span>
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
@@ -211,14 +358,14 @@ const Orders = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.length === 0 ? (
+              {filteredOrders.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
-                    No orders found.
+                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                    No orders found. Try adjusting your filters.
                   </TableCell>
                 </TableRow>
               ) : (
-                orders.map((order) => (
+                filteredOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
@@ -230,11 +377,16 @@ const Orders = () => {
                     </TableCell>
                     <TableCell 
                       className="text-primary hover:underline cursor-pointer"
-                      onClick={(e) => handleClientClick(order.clientName, e)}
+                      onClick={(e) => handleClientClick(order.clientId, e)}
                     >
                       {order.clientName}
                     </TableCell>
                     <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusBadgeVariant(order.status)}>
+                        {order.status}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right font-medium">
                       ${order.amount.toLocaleString()}
                     </TableCell>
