@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Filter, Calendar, MessageSquare, Pencil, Mail } from "lucide-react";
+
+import { useState, useEffect } from "react";
+import { Filter, Calendar, MessageSquare, Pencil, Mail, CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,10 +25,12 @@ import {
   SheetHeader, 
   SheetTitle, 
   SheetDescription, 
-  SheetClose 
+  SheetClose,
+  SheetFooter
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 const weeklyThreads = [
   {
@@ -172,13 +175,16 @@ const clientSummaries = [
 
 const Communication = () => {
   const { openClientDrawer } = useClientDrawer();
+  const { toast } = useToast();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedThread, setSelectedThread] = useState<any>(null);
   const [editedSummary, setEditedSummary] = useState("");
   const [editedTags, setEditedTags] = useState("");
+  const [localThreads, setLocalThreads] = useState(weeklyThreads);
   
   const [emailDrawerOpen, setEmailDrawerOpen] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState<any[]>([]);
+  const [currentEmailIndex, setCurrentEmailIndex] = useState(0);
   
   const handleClientClick = (clientId: number) => {
     openClientDrawer(clientId);
@@ -192,16 +198,51 @@ const Communication = () => {
   };
   
   const handleSaveSummary = () => {
+    if (!selectedThread) return;
+    
+    // Update the thread in our local state
+    const updatedThreads = localThreads.map(thread => {
+      if (thread.id === selectedThread.id) {
+        return {
+          ...thread,
+          summary: editedSummary,
+          tags: editedTags.split(",").map(tag => tag.trim()),
+          edited: true
+        };
+      }
+      return thread;
+    });
+    
+    setLocalThreads(updatedThreads);
     setEditDialogOpen(false);
-    console.log("Saving summary:", editedSummary);
-    console.log("Saving tags:", editedTags.split(",").map(tag => tag.trim()));
+    
+    // Show success toast
+    toast({
+      title: "Summary updated",
+      description: "The client communication summary has been updated successfully.",
+    });
   };
   
   const handleViewEmailThread = (threadId: number) => {
     const emails = emailsByThreadId[threadId as keyof typeof emailsByThreadId] || [];
     setSelectedEmails(emails);
+    setCurrentEmailIndex(0);
     setEmailDrawerOpen(true);
   };
+  
+  const handleNextEmail = () => {
+    if (currentEmailIndex < selectedEmails.length - 1) {
+      setCurrentEmailIndex(currentEmailIndex + 1);
+    }
+  };
+  
+  const handlePreviousEmail = () => {
+    if (currentEmailIndex > 0) {
+      setCurrentEmailIndex(currentEmailIndex - 1);
+    }
+  };
+  
+  const currentEmail = selectedEmails[currentEmailIndex];
   
   return (
     <AppLayout>
@@ -223,7 +264,7 @@ const Communication = () => {
         </TabsList>
         
         <TabsContent value="weekly" className="space-y-4">
-          {weeklyThreads.map((thread) => (
+          {localThreads.map((thread) => (
             <Card key={thread.id} className="relative">
               <CardHeader className="pb-2">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -319,6 +360,7 @@ const Communication = () => {
         </TabsContent>
       </Tabs>
       
+      {/* Edit Summary Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -358,43 +400,72 @@ const Communication = () => {
         </DialogContent>
       </Dialog>
       
+      {/* Email Thread Drawer */}
       <Sheet open={emailDrawerOpen} onOpenChange={setEmailDrawerOpen}>
-        <SheetContent className="w-full sm:max-w-lg">
+        <SheetContent className="w-full sm:max-w-lg md:max-w-xl">
           <SheetHeader className="mb-4">
             <SheetTitle>Email Thread</SheetTitle>
             <SheetDescription>
-              {selectedEmails.length > 0 ? `${selectedEmails.length} emails in this thread` : "No emails found"}
+              {selectedEmails.length > 0 ? 
+                `Viewing email ${currentEmailIndex + 1} of ${selectedEmails.length}` : 
+                "No emails found"}
             </SheetDescription>
           </SheetHeader>
           
-          <ScrollArea className="h-[calc(100vh-120px)]">
-            <div className="space-y-6 pb-6">
-              {selectedEmails.map((email) => (
-                <div key={email.id} className="border rounded-md p-4">
-                  <div className="flex justify-between mb-2">
+          {currentEmail && (
+            <div className="space-y-4">
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <div className="flex justify-between mb-2">
+                  <h3 className="font-medium text-lg">{currentEmail.subject}</h3>
+                  <span className="text-sm text-muted-foreground">{currentEmail.date}</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="space-y-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                     <div>
-                      <h4 className="font-medium">{email.subject}</h4>
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-medium">{email.from}</span>
-                        {" "}
-                        <span className="text-xs">({email.email})</span>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        To: {email.to}
-                      </div>
+                      <p className="font-medium">From: {currentEmail.from}</p>
+                      <p className="text-sm text-muted-foreground">{currentEmail.email}</p>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {email.date}
+                    <div className="mt-2 sm:mt-0">
+                      <p>To: {currentEmail.to}</p>
                     </div>
-                  </div>
-                  <Separator className="my-2" />
-                  <div className="whitespace-pre-line text-sm">
-                    {email.content}
                   </div>
                 </div>
-              ))}
+              </div>
+              
+              <ScrollArea className="h-[calc(100vh-360px)] border rounded-md p-4">
+                <div className="whitespace-pre-line">
+                  {currentEmail.content}
+                </div>
+              </ScrollArea>
+              
+              <SheetFooter className="flex flex-row justify-between sm:justify-between gap-2">
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handlePreviousEmail}
+                    disabled={currentEmailIndex === 0}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Previous
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleNextEmail}
+                    disabled={currentEmailIndex === selectedEmails.length - 1}
+                  >
+                    Next
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
+                <SheetClose asChild>
+                  <Button variant="ghost" size="sm">Close</Button>
+                </SheetClose>
+              </SheetFooter>
             </div>
-          </ScrollArea>
+          )}
         </SheetContent>
       </Sheet>
     </AppLayout>
