@@ -1,13 +1,11 @@
-
 import { useState } from "react";
-import { DollarSign, Package, PercentCircle, Plus, Filter, ArrowRight } from "lucide-react";
+import { DollarSign, Package, PercentCircle } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TrendChart } from "@/components/dashboard/TrendChart";
 import { OrdersSidebar } from "@/components/dashboard/OrdersSidebar";
 import { GoalCompletionChart } from "@/components/dashboard/GoalCompletionChart";
-import { Button } from "@/components/ui/button";
 import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 import { SideDrawerButton } from "@/components/ui/side-drawer-button";
 import {
@@ -21,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Dashboard = () => {
   const [ordersSidebarOpen, setOrdersSidebarOpen] = useState(false);
-  const [selectedView, setSelectedView] = useState("amount");
+  const [selectedView] = useState("count");
   const { openClientDrawer } = useClientDrawer();
 
   const toggleOrdersSidebar = () => {
@@ -39,20 +37,14 @@ const Dashboard = () => {
         description="Your sales performance at a glance"
       >
         <div className="flex gap-2">
-          <Select value={selectedView} onValueChange={setSelectedView}>
+          <Select value={selectedView} onValueChange={() => {}}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="View Mode" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="amount">Order Amount</SelectItem>
               <SelectItem value="count">Order Count</SelectItem>
             </SelectContent>
           </Select>
-          
-          <Button>
-            <Plus className="h-4 w-4 mr-1.5" />
-            New Report
-          </Button>
         </div>
       </PageHeader>
       
@@ -84,7 +76,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <Card>
           <CardHeader className="pb-2 flex items-center justify-between">
-            <CardTitle>Monthly {selectedView === "amount" ? "Sales" : "Orders"}</CardTitle>
+            <CardTitle>Monthly Orders</CardTitle>
           </CardHeader>
           <CardContent>
             <TrendChart className="w-full" />
