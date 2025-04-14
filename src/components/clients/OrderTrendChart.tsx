@@ -50,13 +50,14 @@ interface OrderTrendChartProps {
 }
 
 export function OrderTrendChart({ className, clientName = "Client" }: OrderTrendChartProps) {
-  const formatYAxis = (value: number) => {
+  // Fixed: Changed return type to always be a string
+  const formatYAxis = (value: number): string => {
     if (value >= 1000000) {
       return `${(value / 1000000).toFixed(1)}M`;
     } else if (value >= 1000) {
       return `${(value / 1000).toFixed(0)}K`;
     }
-    return value;
+    return value.toString(); // Convert number to string
   };
 
   return (
