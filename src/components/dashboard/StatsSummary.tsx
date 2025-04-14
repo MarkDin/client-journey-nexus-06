@@ -4,9 +4,10 @@ import { StatsCard } from "@/components/dashboard/StatsCard";
 
 interface StatsSummaryProps {
   onOrdersClick: () => void;
+  onClientSelect?: (clientId: number) => void;
 }
 
-export function StatsSummary({ onOrdersClick }: StatsSummaryProps) {
+export function StatsSummary({ onOrdersClick, onClientSelect }: StatsSummaryProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
       <StatsCard

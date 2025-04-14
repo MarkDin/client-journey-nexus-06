@@ -22,9 +22,10 @@ const topClients = [
 
 interface TopPerformersProps {
   className?: string;
+  onClientSelect?: (clientId: number) => void;
 }
 
-export function TopPerformers({ className }: TopPerformersProps) {
+export function TopPerformers({ className, onClientSelect }: TopPerformersProps) {
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
@@ -59,7 +60,11 @@ export function TopPerformers({ className }: TopPerformersProps) {
             <h3 className="text-md font-medium mb-2">Top Clients</h3>
             <div className="space-y-2">
               {topClients.map((client) => (
-                <div key={client.id} className="flex items-center justify-between">
+                <div 
+                  key={client.id} 
+                  className="flex items-center justify-between cursor-pointer hover:bg-muted/50 p-1 rounded-md transition-colors"
+                  onClick={() => onClientSelect && onClientSelect(client.id)}
+                >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{client.name}</p>
                   </div>
