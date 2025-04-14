@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { 
@@ -12,7 +11,7 @@ import {
   User, 
   ChevronRight, 
   Menu,
-  ShieldQuestion // Keeping the existing icon
+  HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -109,7 +108,7 @@ export function AppSidebar() {
               {[...mainMenu, { 
                 name: "Help & Support", 
                 href: "/support", 
-                icon: <ShieldQuestion className="h-5 w-5" /> 
+                icon: <HelpCircle className="h-5 w-5" /> 
               }].map((item) => (
                 <NavLink
                   key={item.href}
@@ -175,20 +174,20 @@ export function AppSidebar() {
             ))}
           </div>
           
-          {/* Help & Support item at the bottom */}
           <div className="mt-auto mb-4">
             <NavLink
               to="/support"
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                  isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                  "bg-[#1A1F2C] text-white hover:bg-[#2C3242]",
+                  isActive ? "ring-2 ring-primary" : "",
                   isCollapsed && "justify-center"
                 )
               }
               title={isCollapsed ? "Help & Support" : undefined}
             >
-              <ShieldQuestion className="h-5 w-5" />
+              <HelpCircle className="h-5 w-5" />
               {!isCollapsed && <span>Help & Support</span>}
             </NavLink>
           </div>
