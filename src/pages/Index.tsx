@@ -1,24 +1,18 @@
 
 import { useState } from "react";
+import { DollarSign, Package, PercentCircle } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { StatsCard } from "@/components/dashboard/StatsCard";
+import { TrendChart } from "@/components/dashboard/TrendChart";
 import { OrdersSidebar } from "@/components/dashboard/OrdersSidebar";
-import { StatsSummary } from "@/components/dashboard/StatsSummary";
-import { ChartsSection } from "@/components/dashboard/ChartsSection";
-import { GoalSection } from "@/components/dashboard/GoalSection";
-import { ClientDetail } from "@/components/clients/ClientDetail";
+import { GoalCompletionChart } from "@/components/dashboard/GoalCompletionChart";
 
 const Dashboard = () => {
   const [ordersSidebarOpen, setOrdersSidebarOpen] = useState(false);
-  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
 
   const toggleOrdersSidebar = () => {
     setOrdersSidebarOpen(!ordersSidebarOpen);
-  };
-
-  // Function to handle client selection from anywhere in the dashboard
-  const handleClientSelect = (clientId: number) => {
-    setSelectedClientId(clientId);
   };
 
   return (
@@ -28,26 +22,38 @@ const Dashboard = () => {
         description="Your sales performance at a glance" 
       />
       
-      {/* Stats Cards Section */}
-      <StatsSummary onOrdersClick={toggleOrdersSidebar} onClientSelect={handleClientSelect} />
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
+        <StatsCard
+          title="YTD Sales"
+          value="$4.3M"
+          icon={<DollarSign className="h-5 w-5" />}
+          trend={{ value: 12, label: "vs last year" }}
+        />
+        <StatsCard
+          title="Weekly New Orders"
+          value="247"
+          icon={<Package className="h-5 w-5" />}
+          trend={{ value: 8, label: "vs last week" }}
+          onClick={toggleOrdersSidebar}
+          clickable
+        />
+        <StatsCard
+          title="Goal Completion Rate"
+          value="78%"
+          icon={<PercentCircle className="h-5 w-5" />}
+          trend={{ value: -3, label: "vs last month" }}
+        />
+      </div>
       
-      {/* Charts Section */}
-      <ChartsSection onClientSelect={handleClientSelect} />
-
-      {/* Goal Completion Section */}
-      <GoalSection />
+      {/* Charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <TrendChart className="w-full" />
+        <GoalCompletionChart className="w-full" />
+      </div>
 
       {/* Orders Sidebar */}
       <OrdersSidebar isOpen={ordersSidebarOpen} onClose={() => setOrdersSidebarOpen(false)} />
-      
-      {/* Client Detail Drawer */}
-      {selectedClientId !== null && (
-        <ClientDetail 
-          clientId={selectedClientId} 
-          onClose={() => setSelectedClientId(null)}
-          open={selectedClientId !== null}
-        />
-      )}
     </AppLayout>
   );
 };
