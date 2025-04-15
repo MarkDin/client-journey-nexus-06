@@ -1,20 +1,19 @@
-
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 
 interface ClientDrawerContextType {
-  selectedClientId: number | null;
+  selectedClientId: string | null;
   isDrawerOpen: boolean;
-  openClientDrawer: (clientId: number) => void;
+  openClientDrawer: (clientId: string) => void;
   closeClientDrawer: () => void;
 }
 
 const ClientDrawerContext = createContext<ClientDrawerContextType | undefined>(undefined);
 
 export function ClientDrawerProvider({ children }: { children: ReactNode }) {
-  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const openClientDrawer = (clientId: number) => {
+  const openClientDrawer = (clientId: string) => {
     setSelectedClientId(clientId);
     setIsDrawerOpen(true);
   };

@@ -1,276 +1,112 @@
-import { useState } from "react";
-import { Calendar, MessageSquare, X } from "lucide-react";
+import { ClientInsightCard } from "@/components/communication/ClientInsightCard";
+import { EmailThread } from "@/components/communication/EmailThread";
+import { WeeklySummaryCard } from "@/components/communication/WeeklySummaryCard";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useClientDrawer } from "@/contexts/ClientDrawerContext";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 import { useToast } from "@/hooks/use-toast";
-import { WeeklySummaryCard } from "@/components/communication/WeeklySummaryCard";
-import { ClientInsightCard } from "@/components/communication/ClientInsightCard";
-import { EmailThread } from "@/components/communication/EmailThread";
 import { supabase } from "@/integrations/supabase/client";
+import { ClientSummary, Email, WeeklyThread } from "@/types/communication";
+import { format } from "date-fns";
+import { Calendar, MessageSquare, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
-const weeklyThreads = [
-  {
-    id: 1,
-    clientId: 1,
-    clientName: "Global Industries Inc.",
-    weekRange: "June 8-14, 2025",
-    summary: "Confirmed order #ORD-2025-1245 for 50 units of Industrial Sensors X-5200 with delivery estimated for June 20th. Client expressed satisfaction with order processing time. Follow-up scheduled for June 16th to confirm shipment details.",
-    tags: ["order", "confirmation", "delivery"],
-    aiGenerated: true,
-    edited: false
-  },
-  {
-    id: 2,
-    clientId: 2,
-    clientName: "Tech Solutions Ltd.",
-    weekRange: "June 8-14, 2025",
-    summary: "Initial discussion about Smart Control Systems implementation timeline. Client's technical team is ready to begin integration. Will schedule a call to discuss implementation details and provide technical documentation. Client emphasized importance of meeting the July 1st launch date.",
-    tags: ["implementation", "timeline", "integration"],
-    aiGenerated: true,
-    edited: true
-  },
-  {
-    id: 3,
-    clientId: 3,
-    clientName: "Premier Enterprises",
-    weekRange: "June 8-14, 2025",
-    summary: "Pricing inquiry for bulk order (20+ units) of Manufacturing Tools Kit. Provided 15% volume discount quote. Client is reviewing internally with decision expected by June 15th. Potential to establish recurring quarterly orders if satisfied with initial delivery.",
-    tags: ["pricing", "bulk order", "quote"],
-    aiGenerated: true,
-    edited: false
-  }
-];
-
-const emailsByThreadId = {
-  1: [
-    {
-      id: 101,
-      from: "Michael Johnson",
-      email: "mjohnson@globalindustries.com",
-      to: "John Doe",
-      date: "June 14, 2025 10:32 AM",
-      subject: "Order Confirmation #ORD-2025-1245",
-      content: "Hi John,\n\nThank you for processing our order so quickly. We're pleased to confirm our order #ORD-2025-1245 for 50 units of Industrial Sensors X-5200.\n\nCan you please confirm the expected delivery date? We're hoping to receive the shipment by June 20th if possible.\n\nBest regards,\nMichael Johnson\nProcurement Manager\nGlobal Industries Inc."
-    },
-    {
-      id: 102,
-      from: "John Doe",
-      email: "john.doe@yourcompany.com",
-      to: "Michael Johnson",
-      date: "June 14, 2025 11:45 AM",
-      subject: "Re: Order Confirmation #ORD-2025-1245",
-      content: "Hello Michael,\n\nThank you for your order. I can confirm that we've scheduled delivery for June 20th as requested. The order is being processed now and will ship out on June 18th.\n\nWould you like me to send you tracking information once it's available?\n\nBest regards,\nJohn Doe\nAccount Manager"
-    },
-    {
-      id: 103,
-      from: "Michael Johnson",
-      email: "mjohnson@globalindustries.com",
-      to: "John Doe",
-      date: "June 14, 2025 2:15 PM",
-      subject: "Re: Order Confirmation #ORD-2025-1245",
-      content: "Hi John,\n\nThat's perfect, thank you for confirming. Yes, please do send the tracking information once available.\n\nWe appreciate the quick turnaround on this order.\n\nBest regards,\nMichael"
-    }
-  ],
-  2: [
-    {
-      id: 201,
-      from: "Robert Lee",
-      email: "rlee@techsolutions.com",
-      to: "Jane Smith",
-      date: "June 12, 2025 9:15 AM",
-      subject: "Smart Control Systems Implementation",
-      content: "Hello Jane,\n\nFollowing our discussion last week, I wanted to confirm that our technical team is ready to begin the integration of the Smart Control Systems. We've reviewed the documentation you sent over and have a few questions about the implementation timeline.\n\nCan we schedule a call this week to go over the details? It's important for us to meet the July 1st launch date.\n\nBest regards,\nRobert Lee\nCTO\nTech Solutions Ltd."
-    },
-    {
-      id: 202,
-      from: "Jane Smith",
-      email: "jane.smith@yourcompany.com",
-      to: "Robert Lee",
-      date: "June 12, 2025 10:30 AM",
-      subject: "Re: Smart Control Systems Implementation",
-      content: "Hi Robert,\n\nI'm glad to hear your team is ready to proceed. I'd be happy to schedule a call this week to discuss the implementation timeline and answer any questions you might have.\n\nHow does Thursday at 2 PM sound? I'll send over some additional technical documentation before our call that should help clarify some of the integration points.\n\nRegards,\nJane Smith\nSolutions Architect"
-    }
-  ],
-  3: [
-    {
-      id: 301,
-      from: "Sarah Williams",
-      email: "swilliams@premierenterprises.com",
-      to: "Mark Wilson",
-      date: "June 10, 2025 11:20 AM",
-      subject: "Bulk Order Pricing Inquiry",
-      content: "Dear Mark,\n\nWe're looking to place a bulk order for 20+ units of your Manufacturing Tools Kit. Could you please provide us with pricing information for this volume? We'd be interested in knowing if there are any discounts available for orders of this size.\n\nWe're hoping to make a decision by June 15th, as we have a new production line starting up at the end of the month.\n\nThank you,\nSarah Williams\nDirector of Operations\nPremier Enterprises"
-    },
-    {
-      id: 302,
-      from: "Mark Wilson",
-      email: "mark.wilson@yourcompany.com",
-      to: "Sarah Williams",
-      date: "June 10, 2025 3:45 PM",
-      subject: "Re: Bulk Order Pricing Inquiry",
-      content: "Hello Sarah,\n\nThank you for your interest in our Manufacturing Tools Kit. For orders of 20+ units, we can offer a 15% volume discount off our standard pricing.\n\nI've attached a detailed quote for your review. If you're satisfied with this initial order and decide to establish recurring quarterly orders, we can discuss additional ongoing discounts.\n\nPlease let me know if you have any questions or if you'd like to schedule a call to discuss this further.\n\nBest regards,\nMark Wilson\nSales Director"
-    }
-  ]
-};
-
-const clientSummaries = [
-  {
-    clientId: 1,
-    clientName: "Global Industries Inc.",
-    summary: "Global Industries Inc. has been a consistent client since 2020, starting with quarterly purchases of industrial equipment. They became a major account in 2023 with a 45% increase in order value. Their main focus is on manufacturing equipment for the automotive industry. Recent discussions have centered around expanding their production line and implementing new automation solutions.",
-    keyInsights: [
-      "Consistent quarterly purchasing pattern",
-      "45% growth in order value since 2023",
-      "Interested in automation solutions",
-      "Planning production line expansion"
-    ],
-    edited: false,
-    communications: [
-      {
-        id: 101,
-        week: "June 3-9, 2025",
-        summary: "Discussion about upcoming shipment of industrial sensors. Client requested expedited delivery to their Chicago facility.",
-        tags: ["shipment", "delivery", "sensors"],
-        threadCount: 4
-      },
-      {
-        id: 102,
-        week: "May 27-June 2, 2025",
-        summary: "Follow-up on quality concerns from April shipment. Issue was resolved with replacement parts sent.",
-        tags: ["quality", "resolution", "replacement"],
-        threadCount: 3
-      }
-    ]
-  },
-  {
-    clientId: 2,
-    clientName: "Tech Solutions Ltd.",
-    summary: "Tech Solutions Ltd. joined as a client in 2022 with initial small orders for testing our systems. They quickly scaled up purchases after successful pilot implementation. Their communication focuses on technical specifications and integration support. They value quick response times and detailed documentation. Recent conversations indicate plans to implement our systems across their entire European division.",
-    keyInsights: [
-      "Values technical documentation",
-      "Rapid scaling after successful pilots",
-      "European expansion plans",
-      "Prioritizes integration support"
-    ],
-    edited: false,
-    communications: [
-      {
-        id: 201,
-        week: "June 3-9, 2025",
-        summary: "Technical discussion about API integration with their existing systems. Provided documentation and sample code.",
-        tags: ["integration", "API", "documentation"],
-        threadCount: 5
-      },
-      {
-        id: 202,
-        week: "May 27-June 2, 2025",
-        summary: "Planning call for European division implementation. Timeline and resource requirements discussed.",
-        tags: ["planning", "expansion", "implementation"],
-        threadCount: 2
-      }
-    ]
-  },
-  {
-    clientId: 3,
-    clientName: "Premier Enterprises",
-    summary: "Premier Enterprises has been a client since 2021, primarily purchasing manufacturing tools with seasonal ordering patterns. They tend to place larger orders in Q2 and Q4. Price sensitivity is a key factor in their purchasing decisions, and they often request bulk discounts. Their feedback has led to three product improvements. Recent communications suggest interest in our new premium tool line.",
-    keyInsights: [
-      "Seasonal ordering patterns (Q2/Q4 heavy)",
-      "Price sensitive, seeks discounts",
-      "Provided valuable product feedback",
-      "Interest in premium product line"
-    ],
-    edited: false,
-    communications: [
-      {
-        id: 301,
-        week: "June 3-9, 2025",
-        summary: "Inquiry about bulk pricing for the new premium tool line. Provided quote with volume discounts.",
-        tags: ["pricing", "premium", "bulk order"],
-        threadCount: 3
-      },
-      {
-        id: 302,
-        week: "May 20-26, 2025",
-        summary: "Product feedback session with their operations team. Discussed potential improvements to tool durability.",
-        tags: ["feedback", "product improvement", "durability"],
-        threadCount: 4
-      }
-    ]
-  }
-];
-
-const Communication = () => {
+export default function Communication() {
   const { openClientDrawer } = useClientDrawer();
   const { toast } = useToast();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedThread, setSelectedThread] = useState<any>(null);
+  const [selectedThread, setSelectedThread] = useState<WeeklyThread | null>(null);
   const [editedSummary, setEditedSummary] = useState("");
   const [editedTags, setEditedTags] = useState("");
-  const [localThreads, setLocalThreads] = useState(weeklyThreads);
-  
+  const [weeklyThreads, setWeeklyThreads] = useState<WeeklyThread[]>([]);
+  const [selectedEmails, setSelectedEmails] = useState<Email[]>([]);
+  const [clientSummaries, setClientSummaries] = useState<ClientSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingEmails, setLoadingEmails] = useState(false);
+  const [localThreads, setLocalThreads] = useState<WeeklyThread[]>([]);
+  const [localClientSummaries, setLocalClientSummaries] = useState<ClientSummary[]>([]);
+
   const [emailDrawerOpen, setEmailDrawerOpen] = useState(false);
-  const [selectedEmails, setSelectedEmails] = useState<any[]>([]);
-  const [expandedEmailIds, setExpandedEmailIds] = useState<number[]>([]);
-  
-  const [localClientSummaries, setLocalClientSummaries] = useState(clientSummaries);
+  const [expandedEmailIds, setExpandedEmailIds] = useState<string[]>([]);
+
   const [insightEditDialogOpen, setInsightEditDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [editedClientSummary, setEditedClientSummary] = useState("");
   const [editedInsights, setEditedInsights] = useState<string[]>([]);
-  
-  const handleClientClick = (clientId: number) => {
-    openClientDrawer(clientId);
+
+  const handleClientClick = (clientId: string) => {
+    const client = clientSummaries.find(c => c.clientId === clientId);
+    if (client) {
+      openClientDrawer(clientId);
+    }
   };
-  
-  const handleEditSummary = (thread: any) => {
+
+  const handleEditThread = (thread: WeeklyThread) => {
     setSelectedThread(thread);
     setEditedSummary(thread.summary);
     setEditedTags(thread.tags.join(", "));
     setEditDialogOpen(true);
   };
-  
-  const handleSaveSummary = () => {
+
+  const handleSaveEdit = async () => {
     if (!selectedThread) return;
-    
-    const updatedThreads = localThreads.map(thread => {
-      if (thread.id === selectedThread.id) {
-        return {
-          ...thread,
+
+    try {
+      const { error } = await supabase
+        .from('client_communications')
+        .update({
           summary: editedSummary,
           tags: editedTags.split(",").map(tag => tag.trim()),
           edited: true
-        };
-      }
-      return thread;
-    });
-    
-    setLocalThreads(updatedThreads);
-    setEditDialogOpen(false);
-    
-    toast({
-      title: "Summary updated",
-      description: "The client communication summary has been updated successfully.",
-    });
+        })
+        .eq('id', selectedThread.id);
+
+      if (error) throw error;
+
+      const updatedThreads = weeklyThreads.map(thread =>
+        thread.id === selectedThread.id
+          ? {
+            ...thread,
+            summary: editedSummary,
+            tags: editedTags.split(",").map(tag => tag.trim()),
+            edited: true
+          }
+          : thread
+      );
+
+      setWeeklyThreads(updatedThreads);
+      setLocalThreads(updatedThreads);
+      setEditDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Thread summary updated successfully.",
+      });
+    } catch (error) {
+      console.error('Error updating thread:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update thread summary. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
-  
+
   const handleEditClientInsight = (client: any) => {
     setSelectedClient(client);
     setEditedClientSummary(client.summary);
     setEditedInsights([...client.keyInsights]);
     setInsightEditDialogOpen(true);
   };
-  
+
   const handleSaveClientInsight = () => {
     if (!selectedClient) return;
-    
+
     const updatedClientSummaries = localClientSummaries.map(client => {
       if (client.clientId === selectedClient.clientId) {
         return {
@@ -282,44 +118,71 @@ const Communication = () => {
       }
       return client;
     });
-    
+
     setLocalClientSummaries(updatedClientSummaries);
     setInsightEditDialogOpen(false);
-    
+
     toast({
       title: "Client insight updated",
       description: "The AI-generated client insight has been updated successfully.",
     });
   };
-  
+
   const handleAddInsight = () => {
     setEditedInsights([...editedInsights, ""]);
   };
-  
+
   const handleInsightChange = (index: number, value: string) => {
     const newInsights = [...editedInsights];
     newInsights[index] = value;
     setEditedInsights(newInsights);
   };
-  
+
   const handleRemoveInsight = (index: number) => {
     const newInsights = [...editedInsights];
     newInsights.splice(index, 1);
     setEditedInsights(newInsights);
   };
-  
-  const handleViewEmailThread = (threadId: number) => {
-    const emails = emailsByThreadId[threadId as keyof typeof emailsByThreadId] || [];
-    setSelectedEmails(emails);
-    if (emails.length > 0) {
-      setExpandedEmailIds([emails[0].id]);
-    } else {
-      setExpandedEmailIds([]);
+
+  const handleViewEmailThread = async (threadId: string) => {
+    try {
+      setLoadingEmails(true);
+      const { data: emailsData, error: emailsError } = await supabase
+        .from('email')
+        .select('*')
+        .eq('communication_id', threadId)
+        .order('send_at', { ascending: true });
+
+      if (emailsError) throw emailsError;
+
+      const formattedEmails: Email[] = (emailsData || []).map(email => ({
+        id: String(email.id),
+        from: email.sender || '',
+        email: email.sender_email || '',
+        to: email.receiver || '',
+        date: format(new Date(email.send_at || ''), 'MMM d, yyyy h:mm a'),
+        subject: email.subject || '',
+        content: email.content || ''
+      }));
+
+      setSelectedEmails(formattedEmails);
+      if (formattedEmails.length > 0) {
+        setExpandedEmailIds([formattedEmails[0].id]);
+      }
+      setEmailDrawerOpen(true);
+    } catch (error) {
+      console.error('Error fetching emails:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load emails. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingEmails(false);
     }
-    setEmailDrawerOpen(true);
   };
-  
-  const toggleEmailExpand = (emailId: number) => {
+
+  const toggleEmailExpand = (emailId: string) => {
     setExpandedEmailIds(prevIds => {
       if (prevIds.includes(emailId)) {
         return prevIds.filter(id => id !== emailId);
@@ -328,159 +191,279 @@ const Communication = () => {
       }
     });
   };
-  
+
+  const handleViewTimeline = (clientId: number, week: string) => {
+    // TODO: 实现查看完整时间线的逻辑
+    console.log('View timeline for client', clientId, 'week:', week);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching data...');
+
+      // 获取本周的通信记录
+      const { data: communicationData, error: threadsError } = await supabase
+        .from('client_communications')
+        .select(`
+          id,
+          client_id,
+          customers!client_communications_client_id_fkey (
+            name
+          ),
+          summary,
+          tags,
+          ai_generated,
+          edited,
+          week_start,
+          week_end,
+          thread_count
+        `)
+        .order('week_start', { ascending: false })
+        .limit(10);
+
+      console.log('Communications data:', communicationData);
+      if (threadsError) throw threadsError;
+
+      // 获取所有客户摘要
+      const { data: summariesData, error: summariesError } = await supabase
+        .from('client_summaries')
+        .select(`
+          id,
+          client_id,
+          customers!client_summaries_client_id_fkey (
+            name
+          ),
+          summary,
+          key_insights,
+          edited
+        `);
+
+      console.log('Summaries data:', summariesData);
+      if (summariesError) throw summariesError;
+
+      // 格式化周线程数据
+      const formattedThreads: WeeklyThread[] = communicationData?.map(thread => ({
+        id: String(thread.id),
+        clientId: String(thread.client_id),
+        clientName: thread.customers?.name || '',
+        weekRange: thread.week_start ? `${format(new Date(thread.week_start), 'MMM d')}-${format(new Date(thread.week_end), 'MMM d, yyyy')}` : 'No date',
+        summary: thread.summary || '',
+        tags: thread.tags || [],
+        aiGenerated: thread.ai_generated || false,
+        edited: thread.edited || false
+      })) || [];
+
+      // 格式化客户摘要数据
+      const formattedSummaries: ClientSummary[] = summariesData?.map(summary => ({
+        clientId: String(summary.client_id),
+        clientName: summary.customers?.name || '',
+        summary: summary.summary || '',
+        keyInsights: summary.key_insights || [],
+        edited: summary.edited || false,
+        communications: communicationData
+          ?.filter(comm => comm.client_id === summary.client_id)
+          .map(comm => ({
+            id: String(comm.id),
+            week: comm.week_start ? `${format(new Date(comm.week_start), 'MMM d')}-${format(new Date(comm.week_end), 'MMM d, yyyy')}` : 'No date',
+            summary: comm.summary || '',
+            tags: comm.tags || [],
+            threadCount: comm.thread_count || 0
+          })) || []
+      })) || [];
+
+      console.log('Formatted threads:', formattedThreads);
+      console.log('Formatted summaries:', formattedSummaries);
+
+      setWeeklyThreads(formattedThreads);
+      setLocalThreads(formattedThreads);
+      setClientSummaries(formattedSummaries);
+      setLocalClientSummaries(formattedSummaries);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load communication data. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AppLayout>
-      <PageHeader 
-        title="Client Communication" 
-        description="AI-analyzed customer communication history"
-      />
-      
-      <Tabs defaultValue="weekly" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
-          <TabsTrigger value="weekly">
-            <Calendar className="h-4 w-4 mr-2" />
-            Weekly Summary
-          </TabsTrigger>
-          <TabsTrigger value="ai-summary">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            AI Client Insights
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="weekly" className="space-y-4">
-          {localThreads.map((thread) => (
-            <WeeklySummaryCard
-              key={thread.id}
-              thread={thread}
-              onEdit={handleEditSummary}
-              onViewEmails={handleViewEmailThread}
-              onClientClick={handleClientClick}
-            />
-          ))}
-        </TabsContent>
-        
-        <TabsContent value="ai-summary" className="space-y-4">
-          {localClientSummaries.map((client) => (
-            <ClientInsightCard
-              key={client.clientId}
-              client={client}
-              onEdit={handleEditClientInsight}
-              onClientClick={handleClientClick}
-            />
-          ))}
-        </TabsContent>
-      </Tabs>
-      
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Edit Weekly Summary</DialogTitle>
-            <DialogDescription>
-              Make changes to the AI-generated summary for {selectedThread?.clientName} for the week of {selectedThread?.weekRange}.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="summary">Summary</Label>
-              <Textarea
-                id="summary"
-                className="min-h-[100px]"
-                value={editedSummary}
-                onChange={(e) => setEditedSummary(e.target.value)}
-                placeholder="Enter summary of client communication"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags (comma separated)</Label>
-              <Input
-                id="tags"
-                value={editedTags}
-                onChange={(e) => setEditedTags(e.target.value)}
-                placeholder="order, confirmation, delivery"
-              />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveSummary}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={insightEditDialogOpen} onOpenChange={setInsightEditDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Edit Client Insight</DialogTitle>
-            <DialogDescription>
-              Make changes to the AI-generated insight for {selectedClient?.clientName}.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="client-summary">Client Summary</Label>
-              <Textarea
-                id="client-summary"
-                className="min-h-[120px]"
-                value={editedClientSummary}
-                onChange={(e) => setEditedClientSummary(e.target.value)}
-                placeholder="Enter client summary"
-              />
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="key-insights">Key Insights</Label>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleAddInsight}
-                >
-                  Add Insight
-                </Button>
-              </div>
-              
-              {editedInsights.map((insight, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <Input
-                    value={insight}
-                    onChange={(e) => handleInsightChange(index, e.target.value)}
-                    placeholder="Enter key insight"
+      <div className="container mx-auto py-6">
+        <PageHeader
+          title="Client Communications"
+          description="View and manage all client communications and weekly summaries."
+        />
+
+        <Tabs defaultValue="weekly" className="mt-6">
+          <TabsList>
+            <TabsTrigger value="weekly">
+              <Calendar className="w-4 h-4 mr-2" />
+              Weekly Summaries
+            </TabsTrigger>
+            <TabsTrigger value="insights">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Client Insights
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="weekly" className="mt-6">
+            <div className="grid gap-6">
+              {loading ? (
+                <div>Loading...</div>
+              ) : localThreads.length === 0 ? (
+                <div>No communication threads found.</div>
+              ) : (
+                localThreads.map(thread => (
+                  <WeeklySummaryCard
+                    key={thread.id}
+                    thread={thread}
+                    onEdit={handleEditThread}
+                    onViewEmails={() => handleViewEmailThread(thread.id)}
+                    onClientClick={handleClientClick}
                   />
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => handleRemoveInsight(index)}
+                ))
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="insights" className="mt-6">
+            <div className="grid gap-6">
+              {loading ? (
+                <div>Loading...</div>
+              ) : localClientSummaries.length === 0 ? (
+                <div>No client insights found.</div>
+              ) : (
+                localClientSummaries.map(client => (
+                  <ClientInsightCard
+                    key={client.clientId}
+                    client={client}
+                    onEdit={() => handleEditClientInsight(client)}
+                    onClientClick={() => handleClientClick(client.clientId)}
+                    onViewEmails={handleViewEmailThread}
+                    onViewTimeline={handleViewTimeline}
+                  />
+                ))
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Communication Summary</DialogTitle>
+              <DialogDescription>
+                Update the summary and tags for this communication thread.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="summary">Summary</Label>
+                <Textarea
+                  id="summary"
+                  value={editedSummary}
+                  onChange={(e) => setEditedSummary(e.target.value)}
+                  rows={4}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="tags">Tags</Label>
+                <Input
+                  id="tags"
+                  value={editedTags}
+                  onChange={(e) => setEditedTags(e.target.value)}
+                  placeholder="Enter tags separated by commas"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSaveEdit}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={insightEditDialogOpen} onOpenChange={setInsightEditDialogOpen}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Client Insight</DialogTitle>
+              <DialogDescription>
+                Make changes to the AI-generated insight for {selectedClient?.clientName}.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="client-summary">Client Summary</Label>
+                <Textarea
+                  id="client-summary"
+                  className="min-h-[120px]"
+                  value={editedClientSummary}
+                  onChange={(e) => setEditedClientSummary(e.target.value)}
+                  placeholder="Enter client summary"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="key-insights">Key Insights</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddInsight}
                   >
-                    <X className="h-4 w-4" />
+                    Add Insight
                   </Button>
                 </div>
-              ))}
+
+                {editedInsights.map((insight, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <Input
+                      value={insight}
+                      onChange={(e) => handleInsightChange(index, e.target.value)}
+                      placeholder="Enter key insight"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveInsight(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setInsightEditDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveClientInsight}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      <EmailThread
-        open={emailDrawerOpen}
-        onClose={() => setEmailDrawerOpen(false)}
-        emails={selectedEmails}
-        expandedEmailIds={expandedEmailIds}
-        onToggleEmail={toggleEmailExpand}
-      />
+
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setInsightEditDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSaveClientInsight}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <EmailThread
+          open={emailDrawerOpen}
+          onClose={() => setEmailDrawerOpen(false)}
+          emails={selectedEmails}
+          expandedEmailIds={expandedEmailIds}
+          onToggleEmail={toggleEmailExpand}
+        />
+      </div>
     </AppLayout>
   );
-};
-
-export default Communication;
+}

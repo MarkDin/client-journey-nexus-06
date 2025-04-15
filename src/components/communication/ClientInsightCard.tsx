@@ -1,7 +1,6 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Edit, ExternalLink, MessageSquare } from "lucide-react";
 
 interface ClientInsightCardProps {
@@ -21,15 +20,23 @@ interface ClientInsightCardProps {
   };
   onEdit: (client: any) => void;
   onClientClick: (clientId: number) => void;
+  onViewEmails: (threadId: string) => void;
+  onViewTimeline: (clientId: number, week: string) => void;
 }
 
-export function ClientInsightCard({ client, onEdit, onClientClick }: ClientInsightCardProps) {
+export function ClientInsightCard({
+  client,
+  onEdit,
+  onClientClick,
+  onViewEmails,
+  onViewTimeline
+}: ClientInsightCardProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <CardTitle>
-            <span 
+            <span
               className="text-primary hover:underline cursor-pointer"
               onClick={() => onClientClick(client.clientId)}
             >
@@ -81,11 +88,21 @@ export function ClientInsightCard({ client, onEdit, onClientClick }: ClientInsig
                 ))}
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => onViewEmails(String(comm.id))}
+                >
                   <MessageSquare className="h-3.5 w-3.5" />
                   <span>View Emails ({comm.threadCount})</span>
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => onViewTimeline(client.clientId, comm.week)}
+                >
                   <ExternalLink className="h-3.5 w-3.5" />
                   <span>Full Timeline</span>
                 </Button>

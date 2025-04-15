@@ -1,23 +1,14 @@
-
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { WeeklyThread } from "@/types/communication";
 import { Mail, Pencil } from "lucide-react";
 
 interface WeeklySummaryCardProps {
-  thread: {
-    id: number;
-    clientId: number;
-    clientName: string;
-    weekRange: string;
-    summary: string;
-    tags: string[];
-    aiGenerated: boolean;
-    edited: boolean;
-  };
-  onEdit: (thread: any) => void;
-  onViewEmails: (threadId: number) => void;
-  onClientClick: (clientId: number) => void;
+  thread: WeeklyThread;
+  onEdit: (thread: WeeklyThread) => void;
+  onViewEmails: (threadId: string) => void;
+  onClientClick: (clientId: string) => void;
 }
 
 export function WeeklySummaryCard({ thread, onEdit, onViewEmails, onClientClick }: WeeklySummaryCardProps) {
@@ -35,7 +26,7 @@ export function WeeklySummaryCard({ thread, onEdit, onViewEmails, onClientClick 
                 <Badge variant="outline">Edited</Badge>
               )}
             </div>
-            <p 
+            <p
               className="text-sm text-primary hover:underline cursor-pointer mt-1"
               onClick={() => onClientClick(thread.clientId)}
             >
@@ -56,8 +47,8 @@ export function WeeklySummaryCard({ thread, onEdit, onViewEmails, onClientClick 
           ))}
         </div>
         <div className="mt-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => onViewEmails(thread.id)}
           >

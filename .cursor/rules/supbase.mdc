@@ -13,3 +13,57 @@ alwaysApply: true
 - 后端服务使用Supabase，设计到数据的时候，使用MCP工具获取supbase的详细信息
 - supbase的数据库schema路径为src/integrations/supabase/types.ts
 - 使用命令supabase gen types typescript --project-id pugtpiijinkulpbnbgji --schema public > src/integrations/supabase/types.ts 来更新本地的数据表结构
+
+- 新建supbase的edge function要注意运行环境和语法，下面是一个正确的示例
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js";
+
+Deno.serve(async (req: Request) => {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+    const { data: communicationData, error: threadsError } = await supabaseClient
+        .from('client_communications')
+        .select(`
+            id,
+            client_id,
+            customers!client_communications_client_id_fkey (
+                name
+            ),
+            summary,
+            tags,
+            ai_generated,
+            edited,
+            week_start,
+            week_end,
+            thread_count
+        `)
+        .order('week_start', { ascending: false })
+        .limit(10);
+
+    if (threadsError) {
+        return new Response(JSON.stringify({ error: threadsError.message }), {
+            headers: { 'Content-Type': 'application/json' },
+            status: 400,
+        });
+    }
+
+    const formattedData = communicationData?.map(thread => ({
+        id: String(thread.id),
+        clientId: String(thread.client_id),
+        clientName: thread.customers?.name || '',
+        weekRange: thread.week_start ?
+            `${new Date(thread.week_start).toLocaleString('default', { month: 'short' })} ${new Date(thread.week_start).getDate()}-${new Date(thread.week_end).toLocaleString('default', { month: 'short' })} ${new Date(thread.week_end).getDate()}, ${new Date(thread.week_end).getFullYear()}` :
+            'No date',
+        summary: thread.summary || '',
+        tags: thread.tags || [],
+        aiGenerated: thread.ai_generated || false,
+        edited: thread.edited || false
+    })) || [];
+
+    return new Response(JSON.stringify(formattedData), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+    });
+});

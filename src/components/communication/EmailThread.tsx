@@ -1,40 +1,30 @@
-
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetDescription, 
-  SheetClose,
-  SheetFooter
-} from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, X } from "lucide-react";
-
-interface Email {
-  id: number;
-  from: string;
-  email: string;
-  to: string;
-  date: string;
-  subject: string;
-  content: string;
-}
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle
+} from "@/components/ui/sheet";
+import { Email } from "@/types/communication";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface EmailThreadProps {
   open: boolean;
   onClose: () => void;
   emails: Email[];
-  expandedEmailIds: number[];
-  onToggleEmail: (emailId: number) => void;
+  expandedEmailIds: string[];
+  onToggleEmail: (emailId: string) => void;
 }
 
 export function EmailThread({ open, onClose, emails, expandedEmailIds, onToggleEmail }: EmailThreadProps) {
-  const isEmailExpanded = (emailId: number) => expandedEmailIds.includes(emailId);
+  const isEmailExpanded = (emailId: string) => expandedEmailIds.includes(emailId);
 
   return (
     <Sheet open={open} onOpenChange={(open) => !open && onClose()}>
@@ -42,12 +32,12 @@ export function EmailThread({ open, onClose, emails, expandedEmailIds, onToggleE
         <SheetHeader className="mb-4">
           <SheetTitle>Email Thread</SheetTitle>
           <SheetDescription>
-            {emails.length > 0 ? 
-              `${emails.length} emails in this thread` : 
+            {emails.length > 0 ?
+              `${emails.length} emails in this thread` :
               "No emails found"}
           </SheetDescription>
         </SheetHeader>
-        
+
         {emails.length > 0 && (
           <div className="space-y-4">
             <div className="bg-muted/50 p-3 rounded-lg">
@@ -56,18 +46,18 @@ export function EmailThread({ open, onClose, emails, expandedEmailIds, onToggleE
                 Between {emails[0].from.split(" ")[0]} and {emails[0].to.split(" ")[0]}
               </p>
             </div>
-            
+
             <ScrollArea className="h-[calc(100vh-220px)]">
               <div className="space-y-3">
                 {emails.map((email) => (
                   <Card key={email.id} className="border shadow-sm">
-                    <Collapsible 
-                      open={isEmailExpanded(email.id)} 
+                    <Collapsible
+                      open={isEmailExpanded(email.id)}
                       onOpenChange={() => onToggleEmail(email.id)}
                       className="w-full"
                     >
-                      <div 
-                        className="p-3 flex items-center justify-between hover:bg-muted/50 cursor-pointer" 
+                      <div
+                        className="p-3 flex items-center justify-between hover:bg-muted/50 cursor-pointer"
                         onClick={() => onToggleEmail(email.id)}
                       >
                         <div className="flex items-center space-x-3">
@@ -96,7 +86,7 @@ export function EmailThread({ open, onClose, emails, expandedEmailIds, onToggleE
                           </Button>
                         </CollapsibleTrigger>
                       </div>
-                      
+
                       <CollapsibleContent>
                         <Separator />
                         <div className="p-4 pt-3">
@@ -109,7 +99,7 @@ export function EmailThread({ open, onClose, emails, expandedEmailIds, onToggleE
                               <div className="text-sm">To: {email.to}</div>
                             </div>
                           </div>
-                          
+
                           <div className="whitespace-pre-line border-t pt-3">
                             {email.content}
                           </div>
@@ -120,7 +110,7 @@ export function EmailThread({ open, onClose, emails, expandedEmailIds, onToggleE
                 ))}
               </div>
             </ScrollArea>
-            
+
             <SheetFooter>
               <SheetClose asChild>
                 <Button variant="ghost" size="sm">Close</Button>
