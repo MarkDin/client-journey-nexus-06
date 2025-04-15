@@ -1,17 +1,16 @@
-
 import { useState, useEffect } from 'react';
 import { 
   getClientById, 
   getClientCommunications, 
   getClientOrders, 
-  getClientSummary,  // 新添加的函数
+  getClientSummary,
   Client, 
   ClientCommunication, 
   ClientOrder,
   ClientSummary
 } from '@/services/clientService';
 
-export function useClientData(clientId: number | null) {
+export function useClientData(customerCode: string | null) {
   const [client, setClient] = useState<Client | null>(null);
   const [communications, setCommunications] = useState<ClientCommunication[]>([]);
   const [orders, setOrders] = useState<ClientOrder[]>([]);
@@ -21,13 +20,13 @@ export function useClientData(clientId: number | null) {
 
   useEffect(() => {
     async function fetchClientData() {
-      if (!clientId) return;
+      if (!customerCode) return;
       
       setIsLoading(true);
       setError(null);
       
       try {
-        const clientData = await getClientById(clientId.toString());
+        const clientData = await getClientById(customerCode);
         if (!clientData) {
           setError('Client not found');
           return;
@@ -36,15 +35,15 @@ export function useClientData(clientId: number | null) {
         setClient(clientData);
         
         // Fetch communications
-        const commsData = await getClientCommunications(clientId.toString());
+        const commsData = await getClientCommunications(customerCode);
         setCommunications(commsData);
         
         // Fetch client summary
-        const summaryData = await getClientSummary(clientData.id);
+        const summaryData = await getClientSummary(customerCode);
         setSummary(summaryData);
         
         // Fetch orders
-        const ordersData = await getClientOrders(clientData.id);
+        const ordersData = await getClientOrders(customerCode);
         setOrders(ordersData);
       } catch (err) {
         setError('Failed to fetch client data');
@@ -55,13 +54,13 @@ export function useClientData(clientId: number | null) {
     }
     
     fetchClientData();
-  }, [clientId]);
+  }, [customerCode]);
 
   return { 
     client, 
     communications, 
     orders, 
-    summary,  // 新增返回值
+    summary,
     isLoading, 
     error 
   };

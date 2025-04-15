@@ -40,7 +40,7 @@ import { useClientData } from "@/hooks/useClientData";
 import { format } from "date-fns";
 
 interface ClientDetailDrawerProps {
-  clientId: number | null;
+  clientId: string | null;
   onClose: () => void;
   open: boolean;
 }
