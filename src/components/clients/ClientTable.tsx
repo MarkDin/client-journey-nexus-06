@@ -1,6 +1,5 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { 
   ArrowUpDown, 
   Filter, 
@@ -24,116 +23,71 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useClientDrawer } from "@/contexts/ClientDrawerContext";
+import { supabase } from "@/integrations/supabase/client";
 
-const clients = [
-  { 
-    id: 1, 
-    name: "Global Industries Inc.", 
-    industry: "Manufacturing", 
-    salesRep: "John Doe",
-    region: "North America",
-    lastOrder: "2025-06-10",
-  },
-  { 
-    id: 2, 
-    name: "Tech Solutions Ltd.", 
-    industry: "Technology", 
-    salesRep: "Sarah Smith",
-    region: "Europe",
-    lastOrder: "2025-05-28",
-  },
-  { 
-    id: 3, 
-    name: "Acme Manufacturing", 
-    industry: "Manufacturing", 
-    salesRep: "Mike Johnson",
-    region: "North America",
-    lastOrder: "2025-04-15",
-  },
-  { 
-    id: 4, 
-    name: "Smart Systems Corp.", 
-    industry: "Technology", 
-    salesRep: "Emily Brown",
-    region: "Asia Pacific",
-    lastOrder: "2025-06-05",
-  },
-  { 
-    id: 5, 
-    name: "Premier Enterprises", 
-    industry: "Retail", 
-    salesRep: "John Doe",
-    region: "Europe",
-    lastOrder: "2025-06-02",
-  },
-  { 
-    id: 6, 
-    name: "Future Electronics", 
-    industry: "Technology", 
-    salesRep: "Sarah Smith",
-    region: "North America",
-    lastOrder: "2025-05-30",
-  },
-  { 
-    id: 7, 
-    name: "Atlas Construction", 
-    industry: "Construction", 
-    salesRep: "Mike Johnson",
-    region: "North America",
-    lastOrder: "2025-02-18",
-  },
-  { 
-    id: 8, 
-    name: "Pacific Shipping Co.", 
-    industry: "Logistics", 
-    salesRep: "Emily Brown",
-    region: "Asia Pacific",
-    lastOrder: "2025-05-25",
-  },
-  { 
-    id: 9, 
-    name: "European Imports", 
-    industry: "Import/Export", 
-    salesRep: "John Doe",
-    region: "Europe",
-    lastOrder: "2025-05-20",
-  },
-  { 
-    id: 10, 
-    name: "Nordic Supplies", 
-    industry: "Wholesale", 
-    salesRep: "Sarah Smith",
-    region: "Europe",
-    lastOrder: "2025-04-10",
-  },
-];
+// 定义客户数据类型
+interface Client {
+  id: string;
+  name: string;
+  industry: string;
+  region: string;
+  last_order: string | null;
+  customer_code: string;
+}
 
 export function ClientTable() {
   const { openClientDrawer } = useClientDrawer();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
-  
-  const industries = Array.from(new Set(clients.map(client => client.industry)));
-  const regions = Array.from(new Set(clients.map(client => client.region)));
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 获取客户数据
+  useEffect(() => {
+    async function fetchClients() {
+      try {
+        const { data: customers, error } = await supabase
+          .from('customers')
+          .select('*')
+          .order('name');
+
+        if (error) {
+          console.error('Error fetching clients:', error);
+          return;
+        }
+
+        setClients(customers || []);
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchClients();
+  }, []);
+
+  const industries = Array.from(new Set(clients.map(client => client.industry || '')));
+  const regions = Array.from(new Set(clients.map(client => client.region || '')));
   
   const filteredClients = clients.filter(client => {
     const matchesSearch = !searchQuery || 
       client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.salesRep.toLowerCase().includes(searchQuery.toLowerCase());
+      client.customer_code.toLowerCase().includes(searchQuery.toLowerCase());
       
     const matchesIndustry = selectedIndustries.length === 0 || 
-      selectedIndustries.includes(client.industry);
+      (client.industry && selectedIndustries.includes(client.industry));
       
     const matchesRegion = selectedRegions.length === 0 || 
-      selectedRegions.includes(client.region);
+      (client.region && selectedRegions.includes(client.region));
       
     return matchesSearch && matchesIndustry && matchesRegion;
   });
 
-  const handleClientNameClick = (clientId: number, event: React.MouseEvent) => {
+  const handleClientNameClick = (clientId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    openClientDrawer(clientId);
+    openClientDrawer(parseInt(clientId));
   };
   
   return (
@@ -173,7 +127,7 @@ export function ClientTable() {
                       }
                     }}
                   >
-                    {industry}
+                    {industry || 'Unspecified'}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuContent>
@@ -201,7 +155,7 @@ export function ClientTable() {
                       }
                     }}
                   >
-                    {region}
+                    {region || 'Unspecified'}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuContent>
@@ -216,7 +170,6 @@ export function ClientTable() {
             <TableRow>
               <TableHead>Client Name</TableHead>
               <TableHead>Industry</TableHead>
-              <TableHead>Sales Rep</TableHead>
               <TableHead>Region</TableHead>
               <TableHead>
                 <div className="flex items-center space-x-1">
@@ -227,25 +180,30 @@ export function ClientTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredClients.length === 0 ? (
+            {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
+                  Loading clients...
+                </TableCell>
+              </TableRow>
+            ) : filteredClients.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
                   No clients found. Try adjusting your filters.
                 </TableCell>
               </TableRow>
             ) : (
               filteredClients.map((client) => (
-                <TableRow key={client.id} onClick={() => openClientDrawer(client.id)} className="cursor-pointer">
+                <TableRow key={client.id} onClick={() => openClientDrawer(parseInt(client.id))} className="cursor-pointer">
                   <TableCell 
                     className="font-medium text-primary hover:underline cursor-pointer" 
                     onClick={(e) => handleClientNameClick(client.id, e)}
                   >
                     {client.name}
                   </TableCell>
-                  <TableCell>{client.industry}</TableCell>
-                  <TableCell>{client.salesRep}</TableCell>
-                  <TableCell>{client.region}</TableCell>
-                  <TableCell>{new Date(client.lastOrder).toLocaleDateString()}</TableCell>
+                  <TableCell>{client.industry || 'N/A'}</TableCell>
+                  <TableCell>{client.region || 'N/A'}</TableCell>
+                  <TableCell>{client.last_order ? new Date(client.last_order).toLocaleDateString() : 'N/A'}</TableCell>
                 </TableRow>
               ))
             )}
