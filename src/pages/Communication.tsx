@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calendar, MessageSquare } from "lucide-react";
+import { Calendar, MessageSquare, X } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

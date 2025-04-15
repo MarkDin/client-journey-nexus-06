@@ -25,14 +25,7 @@ export function useOrdersData() {
 
         const { data: ordersData, error: ordersError } = await supabase
           .from('customer_orders')
-          .select(`
-            id,
-            customer_code as clientId,
-            customer_name as clientName,
-            order_month as date,
-            order_amount as amount,
-            material as products
-          `)
+          .select('id, customer_code, customer_name, order_month, order_amount, material')
           .order('order_month', { ascending: false });
 
         if (ordersError) {
@@ -41,15 +34,15 @@ export function useOrdersData() {
 
         const formattedOrders: Order[] = ordersData.map(order => ({
           id: order.id,
-          clientId: order.clientId,
-          clientName: order.clientName || 'Unknown Client',
-          date: order.date,
-          amount: Number(order.amount) || 0,
-          products: order.products || 'No product details',
+          clientId: order.customer_code,
+          clientName: order.customer_name || 'Unknown Client',
+          date: order.order_month,
+          amount: Number(order.order_amount) || 0,
+          products: order.material || 'No product details',
           // Determine status based on date
-          status: new Date(order.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          status: new Date(order.order_month) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
             ? "Processing"
-            : new Date(order.date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+            : new Date(order.order_month) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
               ? "Shipped"
               : "Delivered"
         }));

@@ -14,6 +14,7 @@ export type Database = {
           attachments: Json | null
           client_id: string
           created_at: string | null
+          customer_code: string
           id: number
           summary: string | null
           tags: string[] | null
@@ -26,6 +27,7 @@ export type Database = {
           attachments?: Json | null
           client_id: string
           created_at?: string | null
+          customer_code: string
           id?: number
           summary?: string | null
           tags?: string[] | null
@@ -38,6 +40,7 @@ export type Database = {
           attachments?: Json | null
           client_id?: string
           created_at?: string | null
+          customer_code?: string
           id?: number
           summary?: string | null
           tags?: string[] | null
@@ -53,6 +56,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "customers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_communications_customer_code_fkey"
+            columns: ["customer_code"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["customer_code"]
+          },
+          {
+            foreignKeyName: "fk_client_communications_customer_code"
+            columns: ["customer_code"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["customer_code"]
           },
         ]
       }

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -17,7 +16,6 @@ const Clients = () => {
       try {
         setIsLoading(true);
         
-        // Fetch clients from Supabase
         const { data, error } = await supabase
           .from('customers')
           .select('*')
@@ -40,9 +38,8 @@ const Clients = () => {
     fetchClients();
   }, []);
 
-  // Handle client click - open the drawer
-  const handleClientClick = (clientId: string) => {
-    openClientDrawer(clientId);
+  const handleClientClick = (customerCode: string) => {
+    openClientDrawer(customerCode);
   };
 
   return (

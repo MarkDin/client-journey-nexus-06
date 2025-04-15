@@ -57,7 +57,7 @@ export async function getClientById(clientId: string): Promise<Client | null> {
     const { data, error } = await supabase
       .from('customers')
       .select('*')
-      .eq('id', clientId)
+      .eq('customer_code', clientId)
       .single();
     
     if (error) {
@@ -77,7 +77,7 @@ export async function getClientCommunications(clientId: string): Promise<ClientC
     const { data, error } = await supabase
       .from('client_communications')
       .select('*')
-      .eq('client_id', clientId)
+      .eq('customer_code', clientId)
       .order('week_start', { ascending: false });
     
     if (error) {
@@ -115,22 +115,22 @@ export async function getClientOrders(clientCode: string): Promise<ClientOrder[]
 
 export async function getClientSummary(clientId: string): Promise<ClientSummary | null> {
   try {
-    const { data, error } = await supabase
-      .from('customer_extra')
-      .select('*')
-      .eq('client_id', clientId)
+    const { data: clientData, error: clientError } = await supabase
+      .from('customers')
+      .select('ai_summary, tags')
+      .eq('customer_code', clientId)
       .single();
     
-    if (error) {
-      console.error("Error fetching client summary:", error);
+    if (clientError) {
+      console.error("Error fetching client summary:", clientError);
       return null;
     }
     
     // Transform the data to match ClientSummary interface
     const summary: ClientSummary = {
       client_id: clientId,
-      ai_summary: data.ai_summary,
-      key_insights: data.key_insights || []
+      ai_summary: clientData?.ai_summary,
+      key_insights: clientData?.tags || [], // Default to empty array if no insights
     };
     
     return summary;
