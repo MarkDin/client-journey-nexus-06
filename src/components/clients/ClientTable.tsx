@@ -1,19 +1,12 @@
-
-import { useState, useEffect } from "react";
-import { 
-  ArrowUpDown, 
-  Filter, 
-  Search 
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -24,6 +17,16 @@ import {
 } from "@/components/ui/table";
 import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Empty, Spin } from "antd";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Filter,
+  Search
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 // 定义客户数据类型
 interface Client {
@@ -35,6 +38,16 @@ interface Client {
   customer_code: string;
 }
 
+type SortField = 'name' | 'industry' | 'region' | 'last_order';
+type SortOrder = 'asc' | 'desc';
+
+interface SortConfig {
+  field: keyof Client | null;
+  order: 'asc' | 'desc' | null;
+}
+
+const PAGE_SIZE = 10;
+
 export function ClientTable() {
   const { openClientDrawer } = useClientDrawer();
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,54 +55,110 @@ export function ClientTable() {
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [sort, setSort] = useState<SortConfig>({ field: null, order: null });
+  const [industries, setIndustries] = useState<string[]>([]);
+  const [regions, setRegions] = useState<string[]>([]);
 
-  // 获取客户数据
-  useEffect(() => {
-    async function fetchClients() {
-      try {
-        const { data: customers, error } = await supabase
-          .from('customers')
-          .select('*')
-          .order('name');
+  const fetchClients = async () => {
+    try {
+      setLoading(true);
 
-        if (error) {
-          console.error('Error fetching clients:', error);
-          return;
-        }
+      // 构建基础查询
+      let query = supabase
+        .from('customers')
+        .select('*', { count: 'exact' });
 
-        setClients(customers || []);
-      } catch (error) {
-        console.error('Error:', error);
-      } finally {
-        setLoading(false);
+      // 添加搜索条件
+      if (searchQuery) {
+        query = query.ilike('name', `%${searchQuery}%`);
       }
+
+      // 添加行业过滤
+      if (selectedIndustries.length > 0) {
+        query = query.in('industry', selectedIndustries);
+      }
+
+      // 添加地区过滤
+      if (selectedRegions.length > 0) {
+        query = query.in('region', selectedRegions);
+      }
+
+      // 添加排序
+      if (sort.field && sort.order) {
+        query = query.order(sort.field, { ascending: sort.order === 'asc' });
+      }
+
+      // 添加分页
+      const start = (currentPage - 1) * PAGE_SIZE;
+      query = query.range(start, start + PAGE_SIZE - 1);
+
+      const { data, error, count } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      setClients(data || []);
+      setTotalCount(count || 0);
+      setTotalPages(Math.ceil(count / PAGE_SIZE));
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  const fetchFilters = async () => {
+    try {
+      // 获取所有不重复的行业
+      const { data: industryData } = await supabase
+        .from('customers')
+        .select('industry')
+        .not('industry', 'is', null);
+
+      const uniqueIndustries = [...new Set(industryData?.map(item => item.industry))];
+      setIndustries(uniqueIndustries);
+
+      // 获取所有不重复的地区
+      const { data: regionData } = await supabase
+        .from('customers')
+        .select('region')
+        .not('region', 'is', null);
+
+      const uniqueRegions = [...new Set(regionData?.map(item => item.region))];
+      setRegions(uniqueRegions);
+    } catch (error) {
+      console.error('Error fetching filters:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchClients();
-  }, []);
+  }, [searchQuery, selectedIndustries, selectedRegions, currentPage, sort]);
 
-  const industries = Array.from(new Set(clients.map(client => client.industry || '')));
-  const regions = Array.from(new Set(clients.map(client => client.region || '')));
-  
-  const filteredClients = clients.filter(client => {
-    const matchesSearch = !searchQuery || 
-      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.customer_code.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesIndustry = selectedIndustries.length === 0 || 
-      (client.industry && selectedIndustries.includes(client.industry));
-      
-    const matchesRegion = selectedRegions.length === 0 || 
-      (client.region && selectedRegions.includes(client.region));
-      
-    return matchesSearch && matchesIndustry && matchesRegion;
-  });
+  useEffect(() => {
+    fetchFilters();
+  }, []);
 
   const handleClientNameClick = (clientId: string, event: React.MouseEvent) => {
     event.stopPropagation();
     openClientDrawer(parseInt(clientId));
   };
-  
+
+  const handleSort = (field: keyof Client) => {
+    setSort(prev => ({
+      field,
+      order: prev.field === field && prev.order === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
     <Card>
       <div className="p-4 border-b">
@@ -103,7 +172,7 @@ export function ClientTable() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          
+
           <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -132,7 +201,7 @@ export function ClientTable() {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-10">
@@ -163,19 +232,58 @@ export function ClientTable() {
           </div>
         </div>
       </div>
-      
+
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Client Name</TableHead>
-              <TableHead>Industry</TableHead>
-              <TableHead>Region</TableHead>
               <TableHead>
-                <div className="flex items-center space-x-1">
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort('name')}
+                  className="flex items-center space-x-1"
+                >
+                  <span>Client Name</span>
+                  {sort.field === 'name' && (
+                    <span className="ml-1">{sort.order === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort('industry')}
+                  className="flex items-center space-x-1"
+                >
+                  <span>Industry</span>
+                  {sort.field === 'industry' && (
+                    <span className="ml-1">{sort.order === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort('region')}
+                  className="flex items-center space-x-1"
+                >
+                  <span>Region</span>
+                  {sort.field === 'region' && (
+                    <span className="ml-1">{sort.order === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort('last_order')}
+                  className="flex items-center space-x-1"
+                >
                   <span>Last Order</span>
-                  <ArrowUpDown className="h-3 w-3" />
-                </div>
+                  {sort.field === 'last_order' && (
+                    <span className="ml-1">{sort.order === 'asc' ? '↑' : '↓'}</span>
+                  )}
+                </Button>
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -183,20 +291,20 @@ export function ClientTable() {
             {loading ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
-                  Loading clients...
+                  <Spin />
                 </TableCell>
               </TableRow>
-            ) : filteredClients.length === 0 ? (
+            ) : clients.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
-                  No clients found. Try adjusting your filters.
+                  <Empty description="暂无客户数据" />
                 </TableCell>
               </TableRow>
             ) : (
-              filteredClients.map((client) => (
+              clients.map((client) => (
                 <TableRow key={client.id} onClick={() => openClientDrawer(parseInt(client.id))} className="cursor-pointer">
-                  <TableCell 
-                    className="font-medium text-primary hover:underline cursor-pointer" 
+                  <TableCell
+                    className="font-medium text-primary hover:underline cursor-pointer"
                     onClick={(e) => handleClientNameClick(client.id, e)}
                   >
                     {client.name}
@@ -209,6 +317,50 @@ export function ClientTable() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* 分页控件 */}
+      <div className="flex items-center justify-between px-4 py-4 border-t">
+        <div className="flex-1 text-sm text-muted-foreground">
+          显示 {clients.length} 条，共 {totalCount} 条
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="text-sm">
+            第 {currentPage} 页，共 {totalPages} 页
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </Card>
   );
