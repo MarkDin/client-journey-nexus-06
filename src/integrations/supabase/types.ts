@@ -196,34 +196,67 @@ export type Database = {
       }
       email: {
         Row: {
+          attachments: Json | null
           content: string | null
           created_at: string
           customer_id: string | null
+          direction: string | null
           id: number
+          is_read: boolean | null
+          parent_id: number | null
+          read_at: string | null
           receiver: string
+          receiver_email: string | null
           send_at: string | null
           sender: string
+          sender_email: string | null
+          status: string | null
+          subject: string | null
+          thread_id: string | null
           topic: string | null
+          updated_at: string | null
         }
         Insert: {
+          attachments?: Json | null
           content?: string | null
           created_at?: string
           customer_id?: string | null
+          direction?: string | null
           id?: number
+          is_read?: boolean | null
+          parent_id?: number | null
+          read_at?: string | null
           receiver: string
+          receiver_email?: string | null
           send_at?: string | null
           sender: string
+          sender_email?: string | null
+          status?: string | null
+          subject?: string | null
+          thread_id?: string | null
           topic?: string | null
+          updated_at?: string | null
         }
         Update: {
+          attachments?: Json | null
           content?: string | null
           created_at?: string
           customer_id?: string | null
+          direction?: string | null
           id?: number
+          is_read?: boolean | null
+          parent_id?: number | null
+          read_at?: string | null
           receiver?: string
+          receiver_email?: string | null
           send_at?: string | null
           sender?: string
+          sender_email?: string | null
+          status?: string | null
+          subject?: string | null
+          thread_id?: string | null
           topic?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -231,6 +264,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "email"
             referencedColumns: ["id"]
           },
         ]
@@ -322,6 +362,39 @@ export type Database = {
           total_orders?: number
           updated_at?: string
           ytd_sales?: number | null
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          created_by: string | null
+          id: number
+          object_id: string
+          object_type: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: number
+          object_id: string
+          object_type: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: number
+          object_id?: string
+          object_type?: string
+          updated_at?: string | null
+          value?: string
         }
         Relationships: []
       }

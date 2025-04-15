@@ -19,6 +19,8 @@ export interface Client {
   last_order?: string;
   status?: number;
   score?: number;
+  created_at?: string;
+  customer_code: string;
 }
 
 export interface ClientCommunication {
@@ -124,7 +126,14 @@ export async function getClientSummary(clientId: string): Promise<ClientSummary 
       return null;
     }
     
-    return data as ClientSummary;
+    // Transform the data to match ClientSummary interface
+    const summary: ClientSummary = {
+      client_id: clientId,
+      ai_summary: data.ai_summary,
+      key_insights: data.key_insights || []
+    };
+    
+    return summary;
   } catch (error) {
     console.error("Error in getClientSummary:", error);
     return null;
