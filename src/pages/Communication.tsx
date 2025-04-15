@@ -131,7 +131,23 @@ const clientSummaries = [
       "Interested in automation solutions",
       "Planning production line expansion"
     ],
-    edited: false
+    edited: false,
+    communications: [
+      {
+        id: 101,
+        week: "June 3-9, 2025",
+        summary: "Discussion about upcoming shipment of industrial sensors. Client requested expedited delivery to their Chicago facility.",
+        tags: ["shipment", "delivery", "sensors"],
+        threadCount: 4
+      },
+      {
+        id: 102,
+        week: "May 27-June 2, 2025",
+        summary: "Follow-up on quality concerns from April shipment. Issue was resolved with replacement parts sent.",
+        tags: ["quality", "resolution", "replacement"],
+        threadCount: 3
+      }
+    ]
   },
   {
     clientId: 2,
@@ -143,7 +159,23 @@ const clientSummaries = [
       "European expansion plans",
       "Prioritizes integration support"
     ],
-    edited: false
+    edited: false,
+    communications: [
+      {
+        id: 201,
+        week: "June 3-9, 2025",
+        summary: "Technical discussion about API integration with their existing systems. Provided documentation and sample code.",
+        tags: ["integration", "API", "documentation"],
+        threadCount: 5
+      },
+      {
+        id: 202,
+        week: "May 27-June 2, 2025",
+        summary: "Planning call for European division implementation. Timeline and resource requirements discussed.",
+        tags: ["planning", "expansion", "implementation"],
+        threadCount: 2
+      }
+    ]
   },
   {
     clientId: 3,
@@ -155,7 +187,23 @@ const clientSummaries = [
       "Provided valuable product feedback",
       "Interest in premium product line"
     ],
-    edited: false
+    edited: false,
+    communications: [
+      {
+        id: 301,
+        week: "June 3-9, 2025",
+        summary: "Inquiry about bulk pricing for the new premium tool line. Provided quote with volume discounts.",
+        tags: ["pricing", "premium", "bulk order"],
+        threadCount: 3
+      },
+      {
+        id: 302,
+        week: "May 20-26, 2025",
+        summary: "Product feedback session with their operations team. Discussed potential improvements to tool durability.",
+        tags: ["feedback", "product improvement", "durability"],
+        threadCount: 4
+      }
+    ]
   }
 ];
 
