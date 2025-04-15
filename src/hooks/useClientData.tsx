@@ -4,15 +4,18 @@ import {
   getClientById, 
   getClientCommunications, 
   getClientOrders, 
+  getClientSummary,  // 新添加的函数
   Client, 
   ClientCommunication, 
-  ClientOrder 
+  ClientOrder,
+  ClientSummary
 } from '@/services/clientService';
 
 export function useClientData(clientId: number | null) {
   const [client, setClient] = useState<Client | null>(null);
   const [communications, setCommunications] = useState<ClientCommunication[]>([]);
   const [orders, setOrders] = useState<ClientOrder[]>([]);
+  const [summary, setSummary] = useState<ClientSummary | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,11 +39,13 @@ export function useClientData(clientId: number | null) {
         const commsData = await getClientCommunications(clientId.toString());
         setCommunications(commsData);
         
-        // Fetch orders if client has a customer code
-        if (clientData.customer_code) {
-          const ordersData = await getClientOrders(clientData.customer_code);
-          setOrders(ordersData);
-        }
+        // Fetch client summary
+        const summaryData = await getClientSummary(clientData.id);
+        setSummary(summaryData);
+        
+        // Fetch orders
+        const ordersData = await getClientOrders(clientData.id);
+        setOrders(ordersData);
       } catch (err) {
         setError('Failed to fetch client data');
         console.error('Error in fetchClientData:', err);
@@ -52,5 +57,12 @@ export function useClientData(clientId: number | null) {
     fetchClientData();
   }, [clientId]);
 
-  return { client, communications, orders, isLoading, error };
+  return { 
+    client, 
+    communications, 
+    orders, 
+    summary,  // 新增返回值
+    isLoading, 
+    error 
+  };
 }

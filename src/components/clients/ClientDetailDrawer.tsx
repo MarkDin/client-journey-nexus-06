@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   X, 
@@ -48,7 +47,7 @@ interface ClientDetailDrawerProps {
 
 export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDrawerProps) {
   const [activeTab, setActiveTab] = useState("journey");
-  const { client, communications, orders, isLoading, error } = useClientData(clientId);
+  const { client, communications, orders, summary, isLoading, error } = useClientData(clientId);
   
   if (!open) return null;
   
@@ -210,10 +209,25 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground italic">
-                      {client.ai_summary || "No client summary available."}
+                      {summary?.ai_summary || "No client summary available."}
                     </p>
                   </CardContent>
                 </Card>
+                
+                {summary?.key_insights && summary.key_insights.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle>Key Insights</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="list-disc list-inside text-muted-foreground">
+                        {summary.key_insights.map((insight, idx) => (
+                          <li key={idx}>{insight}</li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
                 
                 <Card>
                   <CardHeader className="pb-2">

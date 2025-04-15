@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Client {
@@ -43,6 +42,12 @@ export interface ClientOrder {
   order_month?: string;
   material?: string;
   product_type?: string;
+}
+
+export interface ClientSummary {
+  client_id: string;
+  ai_summary?: string;
+  key_insights?: string[];
 }
 
 export async function getClientById(clientId: string): Promise<Client | null> {
@@ -103,5 +108,25 @@ export async function getClientOrders(clientCode: string): Promise<ClientOrder[]
   } catch (error) {
     console.error("Error in getClientOrders:", error);
     return [];
+  }
+}
+
+export async function getClientSummary(clientId: string): Promise<ClientSummary | null> {
+  try {
+    const { data, error } = await supabase
+      .from('customer_extra')
+      .select('*')
+      .eq('client_id', clientId)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching client summary:", error);
+      return null;
+    }
+    
+    return data as ClientSummary;
+  } catch (error) {
+    console.error("Error in getClientSummary:", error);
+    return null;
   }
 }
