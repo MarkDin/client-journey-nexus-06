@@ -8,6 +8,8 @@ alwaysApply: true
 
 - 前端代码是使用lovable开发的，确实获取数据的能力，你的职责是根据UI展示的数据，帮我生成真实的数据库表以及对应的数据处理的能力
     - 数据处理包括单表查询、分页、排序、连表查询
+- 数据表数量越少越好，尽可能扩展一张表的字段
 - 如果一个页面展示的数据来自多个表数据的join，也请你告诉我，先分析展示的数据结构，需要哪些表，查询语句是什么，再给出代码, 你肯定会缺少很多信息，请一定询问我确认和补充信息
 - 后端服务使用Supabase，设计到数据的时候，使用MCP工具获取supbase的详细信息
 - supbase的数据库schema路径为src/integrations/supabase/types.ts
+- 使用命令supabase gen types typescript --project-id pugtpiijinkulpbnbgji --schema public > src/integrations/supabase/types.ts 来更新本地的数据表结构

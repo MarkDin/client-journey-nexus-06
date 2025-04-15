@@ -213,67 +213,77 @@ export type Database = {
       }
       email: {
         Row: {
-          attachments: Json | null
-          content: string | null
-          created_at: string
-          customer_id: string | null
-          direction: string | null
           id: number
-          is_read: boolean | null
+          thread_id: string
           parent_id: number | null
-          read_at: string | null
-          receiver: string
-          receiver_email: string | null
-          send_at: string | null
+          customer_id: string
+          direction: 'inbound' | 'outbound'
           sender: string
-          sender_email: string | null
-          status: string | null
+          sender_email: string
+          receiver: string
+          receiver_email: string
           subject: string | null
-          thread_id: string | null
-          topic: string | null
-          updated_at: string | null
+          content: string | null
+          attachments: {
+            name: string
+            size: number
+            type: string
+            path: string
+          }[]
+          status: 'draft' | 'sent' | 'deleted'
+          is_read: boolean
+          read_at: string | null
+          send_at: string
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          attachments?: Json | null
-          content?: string | null
-          created_at?: string
-          customer_id?: string | null
-          direction?: string | null
-          id?: number
-          is_read?: boolean | null
+          thread_id?: string
           parent_id?: number | null
-          read_at?: string | null
-          receiver: string
-          receiver_email?: string | null
-          send_at?: string | null
+          customer_id: string
+          direction: 'inbound' | 'outbound'
           sender: string
-          sender_email?: string | null
-          status?: string | null
+          sender_email: string
+          receiver: string
+          receiver_email: string
           subject?: string | null
-          thread_id?: string | null
-          topic?: string | null
-          updated_at?: string | null
+          content?: string | null
+          attachments?: {
+            name: string
+            size: number
+            type: string
+            path: string
+          }[]
+          status?: 'draft' | 'sent' | 'deleted'
+          is_read?: boolean
+          read_at?: string | null
+          send_at?: string
+          created_at?: string
+          updated_at?: string
         }
         Update: {
-          attachments?: Json | null
-          content?: string | null
-          created_at?: string
-          customer_id?: string | null
-          direction?: string | null
-          id?: number
-          is_read?: boolean | null
+          thread_id?: string
           parent_id?: number | null
-          read_at?: string | null
-          receiver?: string
-          receiver_email?: string | null
-          send_at?: string | null
+          customer_id?: string
+          direction?: 'inbound' | 'outbound'
           sender?: string
-          sender_email?: string | null
-          status?: string | null
+          sender_email?: string
+          receiver?: string
+          receiver_email?: string
           subject?: string | null
-          thread_id?: string | null
-          topic?: string | null
-          updated_at?: string | null
+          content?: string | null
+          attachments?: {
+            name: string
+            size: number
+            type: string
+            path: string
+          }[]
+          status?: 'draft' | 'sent' | 'deleted'
+          is_read?: boolean
+          read_at?: string | null
+          send_at?: string
+          created_at?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -448,6 +458,36 @@ export type Database = {
         }
         Relationships: []
       }
+      tags: {
+        Row: {
+          id: number
+          object_id: string
+          object_type: string
+          value: string
+          color: string
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          object_id: string
+          object_type: string
+          value: string
+          color?: string
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          object_id?: string
+          object_type?: string
+          value?: string
+          color?: string
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -502,6 +542,83 @@ export type Database = {
         Args: { p_year?: number; p_month?: number }
         Returns: undefined
       }
+      get_customer_email_threads: {
+        Args: { p_customer_id: string }
+        Returns: {
+          thread_id: string
+          subject: string
+          last_message_at: string
+          message_count: number
+          unread_count: number
+          snippet: string
+          tags: {
+            id: number
+            value: string
+            color: string
+          }[]
+        }[]
+      }
+      get_email_thread: {
+        Args: { p_thread_id: string }
+        Returns: {
+          id: number
+          parent_id: number | null
+          sender: string
+          sender_email: string
+          receiver: string
+          receiver_email: string
+          subject: string
+          content: string
+          attachments: {
+            name: string
+            size: number
+            type: string
+            path: string
+          }[]
+          tags: {
+            id: number
+            value: string
+            color: string
+          }[]
+          send_at: string
+          direction: 'inbound' | 'outbound'
+          is_read: boolean
+          level: number
+        }[]
+      }
+      add_tag: {
+        Args: {
+          p_object_id: string
+          p_object_type: string
+          p_value: string
+          p_color?: string
+        }
+        Returns: {
+          id: number
+          value: string
+          color: string
+        } | null
+      }
+      remove_tag: {
+        Args: {
+          p_object_id: string
+          p_object_type: string
+          p_value: string
+        }
+        Returns: boolean
+      }
+      get_object_tags: {
+        Args: {
+          p_object_id: string
+          p_object_type: string
+        }
+        Returns: {
+          id: number
+          value: string
+          color: string
+          created_at: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
@@ -516,106 +633,106 @@ type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+  ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof Database },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
 > = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+  ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {
