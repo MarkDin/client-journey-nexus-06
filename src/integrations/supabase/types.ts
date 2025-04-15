@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      client_communications: {
+        Row: {
+          attachments: Json | null
+          client_id: string
+          created_at: string | null
+          id: number
+          summary: string | null
+          tags: string[] | null
+          thread_count: number | null
+          week_end: string | null
+          week_label: string | null
+          week_start: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          client_id: string
+          created_at?: string | null
+          id?: number
+          summary?: string | null
+          tags?: string[] | null
+          thread_count?: number | null
+          week_end?: string | null
+          week_label?: string | null
+          week_start?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          client_id?: string
+          created_at?: string | null
+          id?: number
+          summary?: string | null
+          tags?: string[] | null
+          thread_count?: number | null
+          week_end?: string | null
+          week_label?: string | null
+          week_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_communications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_extra: {
         Row: {
           created_at: string
@@ -72,8 +119,12 @@ export type Database = {
       customers: {
         Row: {
           address: string | null
+          ai_summary: string | null
           company: string
           created_at: string | null
+          credit_level: string | null
+          credit_limit: number | null
+          credit_used: number | null
           customer_code: string
           email: string | null
           id: string
@@ -81,17 +132,24 @@ export type Database = {
           last_order: string | null
           lifetime_value: number | null
           name: string
+          next_meeting: string | null
           phone: string | null
           purchase_count: number | null
           region: string | null
+          sales_rep: string | null
           score: number | null
           short_name: string | null
           status: number | null
+          tags: string[] | null
         }
         Insert: {
           address?: string | null
+          ai_summary?: string | null
           company?: string
           created_at?: string | null
+          credit_level?: string | null
+          credit_limit?: number | null
+          credit_used?: number | null
           customer_code?: string
           email?: string | null
           id?: string
@@ -99,17 +157,24 @@ export type Database = {
           last_order?: string | null
           lifetime_value?: number | null
           name?: string
+          next_meeting?: string | null
           phone?: string | null
           purchase_count?: number | null
           region?: string | null
+          sales_rep?: string | null
           score?: number | null
           short_name?: string | null
           status?: number | null
+          tags?: string[] | null
         }
         Update: {
           address?: string | null
+          ai_summary?: string | null
           company?: string
           created_at?: string | null
+          credit_level?: string | null
+          credit_limit?: number | null
+          credit_used?: number | null
           customer_code?: string
           email?: string | null
           id?: string
@@ -117,12 +182,15 @@ export type Database = {
           last_order?: string | null
           lifetime_value?: number | null
           name?: string
+          next_meeting?: string | null
           phone?: string | null
           purchase_count?: number | null
           region?: string | null
+          sales_rep?: string | null
           score?: number | null
           short_name?: string | null
           status?: number | null
+          tags?: string[] | null
         }
         Relationships: []
       }
