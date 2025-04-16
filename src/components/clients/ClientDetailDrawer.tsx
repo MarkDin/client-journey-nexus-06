@@ -1,56 +1,63 @@
-import { useState, useEffect } from "react";
-import { 
-  X, 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Building, 
-  Calendar, 
-  CreditCard, 
-  ShoppingBag, 
-  Download, 
-  FileText, 
-  BarChart2, 
-  Paperclip, 
-  Clock, 
-  MessageSquare, 
-  ExternalLink,
-  PieChart,
-  DollarSign,
-  Loader2
-} from "lucide-react";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetDescription, 
-  SheetClose 
-} from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
+import { OrderTrendChart } from "@/components/clients/OrderTrendChart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { OrderTrendChart } from "@/components/clients/OrderTrendChart";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle
+} from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { useClientData } from "@/hooks/useClientData";
-import { format } from "date-fns";
+import { ClientCommunication, updateSummary } from "@/services/clientService";
+import {
+  BarChart2,
+  Building,
+  Calendar,
+  Clock,
+  CreditCard,
+  DollarSign,
+  Download,
+  Loader2,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Paperclip,
+  Pencil,
+  Phone,
+  PieChart,
+  ShoppingBag,
+  User,
+  X
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { EditSummaryDialog } from "./EditSummaryDialog";
 
 interface ClientDetailDrawerProps {
-  clientId: number | null;
+  clientId: string | null;
   onClose: () => void;
   open: boolean;
 }
 
 export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDrawerProps) {
   const [activeTab, setActiveTab] = useState("journey");
-  const { client, communications, orders, summary, isLoading, error } = useClientData(clientId);
-  
+  const [editingCommunication, setEditingCommunication] = useState<{
+    id: number;
+    summary: string;
+    tags: string[];
+    weekLabel: string;
+  } | null>(null);
+  const { client, communications, orders, summary, isLoading, error, refetch } = useClientData(clientId);
+
   if (!open) return null;
-  
+
   if (isLoading) {
     return (
       <Sheet open={open} onOpenChange={(open) => !open && onClose()}>
@@ -63,7 +70,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
       </Sheet>
     );
   }
-  
+
   if (error || !client) {
     return (
       <Sheet open={open} onOpenChange={(open) => !open && onClose()}>
@@ -76,19 +83,41 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
       </Sheet>
     );
   }
-  
+
   const creditUsagePercentage = client.credit_limit ? (client.credit_used || 0) / client.credit_limit * 100 : 0;
   const formattedOrders = orders.map(order => ({
     id: order.id.substring(0, 8).toUpperCase(),
     date: order.order_month || "Unknown",
     amount: order.order_amount || 0,
-    status: order.order_month && new Date(order.order_month) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) 
-      ? "Processing" 
-      : new Date(order.order_month || "") > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) 
-        ? "Shipped" 
+    status: order.order_month && new Date(order.order_month) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      ? "Processing"
+      : new Date(order.order_month || "") > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        ? "Shipped"
         : "Delivered"
   }));
-  
+
+  const handleEditClick = (communication: ClientCommunication) => {
+    setEditingCommunication({
+      id: communication.id,
+      summary: communication.summary || "",
+      tags: communication.tags || [],
+      weekLabel: communication.week_label || "Unknown date",
+    });
+  };
+
+  const handleSaveSummary = async (newSummary: string, newTags: string) => {
+    if (!editingCommunication) return;
+
+    const success = await updateSummary(editingCommunication.id, newSummary, newTags);
+    if (success) {
+      await refetch();
+      toast.success("摘要更新成功");
+      setEditingCommunication(null);
+    } else {
+      toast.error("更新失败");
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto p-0">
@@ -107,7 +136,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
             </SheetClose>
           </div>
         </SheetHeader>
-        
+
         <ScrollArea className="h-[calc(100vh-80px)] p-4">
           <div className="p-4">
             <Card className="mb-4">
@@ -119,7 +148,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                       <User className="h-4 w-4 text-muted-foreground" />
                       <p className="font-medium">{client.name}</p>
                     </div>
-                    
+
                     <div className="flex flex-col gap-1 mt-3">
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
@@ -131,7 +160,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <p className="text-sm text-muted-foreground">Client Details</p>
                     <div className="space-y-1 mt-1">
@@ -145,20 +174,20 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <p className="text-sm">Next meeting: {client.next_meeting ? 
-                          new Date(client.next_meeting).toLocaleString() : 
+                        <p className="text-sm">Next meeting: {client.next_meeting ?
+                          new Date(client.next_meeting).toLocaleString() :
                           "Not scheduled"}</p>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <p className="text-sm text-muted-foreground">Credit Status</p>
                     <div className="flex items-center gap-2 mt-1">
                       <CreditCard className="h-4 w-4 text-muted-foreground" />
                       <p className="font-medium">{client.credit_level || "Not set"}</p>
                     </div>
-                    
+
                     <div className="mt-2">
                       <div className="flex justify-between text-xs mb-1">
                         <span>Credit Used</span>
@@ -167,7 +196,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                       <Progress value={creditUsagePercentage} className="h-2" />
                     </div>
                   </div>
-                  
+
                   <div>
                     <p className="text-sm text-muted-foreground">Last Order</p>
                     <div className="flex items-center gap-2 mt-1">
@@ -183,7 +212,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                     )}
                   </div>
                 </div>
-                
+
                 <div className="mt-4">
                   <p className="text-sm text-muted-foreground mb-2">Tags</p>
                   <div className="flex flex-wrap gap-2">
@@ -194,26 +223,52 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                 </div>
               </CardContent>
             </Card>
-          
+
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="journey">Customer Journey</TabsTrigger>
                 <TabsTrigger value="orders">Orders & Trends</TabsTrigger>
                 <TabsTrigger value="attachments">Attachments</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="journey" className="space-y-4 mt-4">
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle>AI-Generated Client Summary</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>AI-Generated Client Summary</CardTitle>
+                      {editingCommunication ? (
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => setEditingCommunication(null)}>
+                            <X className="h-4 w-4 mr-2" />
+                            <span>取消</span>
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button variant="ghost" size="sm" onClick={() => handleEditClick(communications[0])}>
+                          <Pencil className="h-4 w-4 mr-2" />
+                          <span>编辑</span>
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground italic">
-                      {summary?.ai_summary || "No client summary available."}
-                    </p>
+                    {editingCommunication ? (
+                      <Textarea
+                        value={editingCommunication.summary}
+                        onChange={(e) => setEditingCommunication({
+                          ...editingCommunication,
+                          summary: e.target.value
+                        })}
+                        className="min-h-[100px]"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground italic">
+                        {summary?.ai_summary || "No client summary available."}
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
-                
+
                 {summary?.key_insights && summary.key_insights.length > 0 && (
                   <Card>
                     <CardHeader className="pb-2">
@@ -228,7 +283,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                     </CardContent>
                   </Card>
                 )}
-                
+
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle>Weekly Communication Summary</CardTitle>
@@ -249,13 +304,14 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                               ))}
                             </div>
                             <div className="mt-3 flex flex-wrap gap-2">
-                              <Button variant="outline" size="sm" className="gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1"
+                                onClick={() => handleEditClick(comm)}
+                              >
                                 <MessageSquare className="h-3.5 w-3.5" />
-                                <span>View Emails ({comm.thread_count || 0})</span>
-                              </Button>
-                              <Button variant="outline" size="sm" className="gap-1">
-                                <ExternalLink className="h-3.5 w-3.5" />
-                                <span>Full Timeline</span>
+                                <span>编辑</span>
                               </Button>
                             </div>
                           </div>
@@ -267,10 +323,10 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                   </CardContent>
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="orders" className="mt-4">
                 <OrderTrendChart clientName={client.company} className="mb-4" />
-                
+
                 <Card>
                   <CardHeader className="pb-2 flex items-center justify-between">
                     <CardTitle>Recent Orders</CardTitle>
@@ -292,7 +348,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                               <p className="font-medium">${order.amount.toLocaleString()}</p>
                               <Badge variant={
                                 order.status === "Processing" ? "outline" :
-                                order.status === "Shipped" ? "secondary" : "default"
+                                  order.status === "Shipped" ? "secondary" : "default"
                               }>
                                 {order.status}
                               </Badge>
@@ -305,7 +361,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                     )}
                   </CardContent>
                 </Card>
-                
+
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <Card>
                     <CardHeader className="pb-2">
@@ -317,7 +373,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">Margin Trend</CardTitle>
@@ -330,7 +386,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                   </Card>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="attachments" className="mt-4">
                 <Card>
                   <CardHeader className="pb-2">
@@ -340,8 +396,8 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
                   <CardContent>
                     {communications.length > 0 && communications.some(c => c.attachments && c.attachments.length > 0) ? (
                       <div className="space-y-3">
-                        {communications.flatMap((comm, commIndex) => 
-                          comm.attachments ? Array.isArray(comm.attachments) ? 
+                        {communications.flatMap((comm, commIndex) =>
+                          comm.attachments ? Array.isArray(comm.attachments) ?
                             comm.attachments.map((attachment, attIndex) => (
                               <div key={`${commIndex}-${attIndex}`} className="flex items-center justify-between p-3 border rounded-md">
                                 <div className="flex items-center gap-3">
@@ -377,6 +433,15 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
             </Tabs>
           </div>
         </ScrollArea>
+
+        <EditSummaryDialog
+          open={!!editingCommunication}
+          onOpenChange={(open) => !open && setEditingCommunication(null)}
+          initialSummary={editingCommunication?.summary || ""}
+          initialTags={editingCommunication?.tags.join(", ") || ""}
+          weekLabel={editingCommunication?.weekLabel || ""}
+          onSave={handleSaveSummary}
+        />
       </SheetContent>
     </Sheet>
   );

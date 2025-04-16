@@ -57,14 +57,14 @@ export async function getClientById(clientId: string): Promise<Client | null> {
     const { data, error } = await supabase
       .from('customers')
       .select('*')
-      .eq('customer_code', clientId)
+      .eq('id', clientId)
       .single();
-    
+
     if (error) {
       console.error("Error fetching client:", error);
       return null;
     }
-    
+
     return data as Client;
   } catch (error) {
     console.error("Error in getClientById:", error);
@@ -77,14 +77,14 @@ export async function getClientCommunications(clientId: string): Promise<ClientC
     const { data, error } = await supabase
       .from('client_communications')
       .select('*')
-      .eq('customer_code', clientId)
+      .eq('client_id', clientId)
       .order('week_start', { ascending: false });
-    
+
     if (error) {
       console.error("Error fetching client communications:", error);
       return [];
     }
-    
+
     return data as ClientCommunication[];
   } catch (error) {
     console.error("Error in getClientCommunications:", error);
@@ -100,12 +100,12 @@ export async function getClientOrders(clientCode: string): Promise<ClientOrder[]
       .eq('customer_code', clientCode)
       .order('order_month', { ascending: false })
       .limit(10);
-    
+
     if (error) {
       console.error("Error fetching client orders:", error);
       return [];
     }
-    
+
     return data as ClientOrder[];
   } catch (error) {
     console.error("Error in getClientOrders:", error);
@@ -120,22 +120,47 @@ export async function getClientSummary(clientId: string): Promise<ClientSummary 
       .select('ai_summary, tags')
       .eq('customer_code', clientId)
       .single();
-    
+
     if (clientError) {
       console.error("Error fetching client summary:", clientError);
       return null;
     }
-    
+
     // Transform the data to match ClientSummary interface
     const summary: ClientSummary = {
       client_id: clientId,
       ai_summary: clientData?.ai_summary,
       key_insights: clientData?.tags || [], // Default to empty array if no insights
     };
-    
+
     return summary;
   } catch (error) {
     console.error("Error in getClientSummary:", error);
     return null;
+  }
+}
+
+export async function updateSummary(communication_id: number, summary: string, tags?: string): Promise<boolean> {
+  try {
+    const updateData: { summary: string; tags?: string[] } = { summary };
+    if (tags) {
+      updateData.tags = tags.split(',').map(tag => tag.trim()).filter(Boolean);
+    }
+
+    const { error } = await supabase
+      .from('client_communications')
+      .update(updateData)
+      .eq('id', communication_id)
+      .single();
+
+    if (error) {
+      console.error("Error updating client summary:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in updateSummary:", error);
+    return false;
   }
 }

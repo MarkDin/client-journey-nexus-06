@@ -21,28 +21,28 @@ import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 // Create a wrapper component that includes the ClientDetailDrawer
 const AppWithClientDrawer = () => {
   const { selectedClientId, isDrawerOpen, closeClientDrawer } = useClientDrawer();
-  
+
   return (
     <>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/activities" element={<Activities />} />
+        {/* <Route path="/activities" element={<Activities />} /> */}
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/:id" element={<ClientDetails />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/analytics" element={<Analytics />} />
-        <Route path="/shipments" element={<Shipments />} />
-        <Route path="/communication" element={<Communication />} />
-        <Route path="/support" element={<Support />} />
+        {/* <Route path="/shipments" element={<Shipments />} /> */}
+        {/* <Route path="/communication" element={<Communication />} /> */}
+        {/* <Route path="/support" element={<Support />} /> */}
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      
+
       {/* Global client detail drawer */}
-      <ClientDetailDrawer 
-        clientId={selectedClientId} 
-        open={isDrawerOpen} 
-        onClose={closeClientDrawer} 
+      <ClientDetailDrawer
+        clientId={selectedClientId}
+        open={isDrawerOpen}
+        onClose={closeClientDrawer}
       />
     </>
   );
@@ -52,7 +52,7 @@ const AppWithClientDrawer = () => {
 const App = () => {
   // Create the client instance inside the component
   const queryClient = new QueryClient();
-  
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
