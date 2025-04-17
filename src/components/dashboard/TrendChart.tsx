@@ -96,22 +96,22 @@ interface TrendChartProps {
 
 export function TrendChart({ className, onCountrySelect }: TrendChartProps) {
   const { data, regions, isLoading, error } = useMonthlySalesData();
-  console.log('data', data);
+  const [hoveredBar, setHoveredBar] = useState<string | null>(null);
+  const [activeRegion, setActiveRegion] = useState<string | null>(null);
   const [selectedData, setSelectedData] = useState<{ month: string; region: string; orders: any[] } | null>(null);
+  const [isTooltipActive, setIsTooltipActive] = useState(false);
 
   const handleBarClick = (data: any, index: number) => {
+    if (isTooltipActive) return;
+
     if (data && data.payload) {
-      // 获取点击的月份和区域
       const month = data.payload.month;
       const region = regions[index];
       const rawData = data.payload.rawData || [];
 
-      // 从原始数据中筛选出符合条件的订单
       const filteredOrders = rawData.filter((item: any) =>
         item.region_name === region
       );
-
-      console.log('filteredOrders', filteredOrders);
 
       setSelectedData({
         month,
@@ -119,6 +119,91 @@ export function TrendChart({ className, onCountrySelect }: TrendChartProps) {
         orders: filteredOrders
       });
     }
+  };
+
+  // 自定义 Tooltip 内容
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const totalValue = payload.reduce((sum: number, entry: any) => sum + (entry.value || 0), 0);
+      const nonZeroEntries = payload
+        .filter((entry: any) => entry.value > 0)
+        .sort((a: any, b: any) => b.value - a.value);
+
+      const handleCountryClick = (entry: any) => {
+        const rawData = data.find(item => item.month === label)?.rawData || [];
+        const filteredOrders = rawData.filter((item: any) =>
+          item.region_name === entry.name
+        );
+
+        setSelectedData({
+          month: label,
+          region: entry.name,
+          orders: filteredOrders
+        });
+
+        if (onCountrySelect) {
+          onCountrySelect(entry.name);
+        }
+      };
+
+      return (
+        <div
+          className="bg-background border rounded-lg p-3 shadow-lg min-w-[300px]"
+          onMouseEnter={(e) => {
+            e.stopPropagation();
+            setIsTooltipActive(true);
+          }}
+          onMouseLeave={(e) => {
+            e.stopPropagation();
+            setIsTooltipActive(false);
+            setActiveRegion(null);
+          }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-medium">{label}</p>
+            <p className="text-sm text-muted-foreground">总计: {formatValue(totalValue)}</p>
+          </div>
+          <div className="max-h-[300px] overflow-y-auto pr-2">
+            {nonZeroEntries.map((entry: any, index: number) => {
+              const isActive = activeRegion === entry.name;
+              return (
+                <div
+                  key={index}
+                  className={`flex items-center justify-between gap-4 py-2 rounded px-2 cursor-pointer transition-all duration-200
+                    ${isActive ? 'bg-accent' : 'hover:bg-accent/50'}`}
+                  onClick={() => handleCountryClick(entry)}
+                  onMouseEnter={() => setActiveRegion(entry.name)}
+                  onMouseLeave={() => setActiveRegion(null)}
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-[120px]">
+                    <div
+                      className={`w-3 h-3 rounded-full flex-shrink-0 transition-transform duration-200
+                        ${isActive ? 'scale-125' : ''}`}
+                      style={{ backgroundColor: entry.fill }}
+                    />
+                    <span className={`font-medium truncate ${isActive ? 'text-accent-foreground' : ''}`}>
+                      {entry.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-right">
+                    <span className={`font-medium ${isActive ? 'text-accent-foreground' : ''}`}>
+                      {formatValue(entry.value)}
+                    </span>
+                    <span className={`text-xs ${isActive ? 'text-accent-foreground/80' : 'text-muted-foreground'} whitespace-nowrap`}>
+                      ({((entry.value / totalValue) * 100).toFixed(1)}%)
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-2 pt-2 border-t text-xs text-muted-foreground text-center">
+            点击国家查看详情
+          </div>
+        </div>
+      );
+    }
+    return null;
   };
 
   if (isLoading) {
@@ -167,12 +252,41 @@ export function TrendChart({ className, onCountrySelect }: TrendChartProps) {
           <CardTitle>Monthly Sales Trend</CardTitle>
         </CardHeader>
         <CardContent>
+          <style>
+            {`
+              .recharts-bar-rectangle {
+                transition: all 0.3s ease;
+              }
+              .recharts-bar-rectangle:hover {
+                transform: scaleX(1.1);
+                filter: brightness(1.1);
+                ${isTooltipActive ? 'pointer-events: none; cursor: default;' : ''}
+              }
+            `}
+          </style>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={data}
                 margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
                 barCategoryGap={10}
+                onMouseMove={(state) => {
+                  if (state?.activeTooltipIndex !== undefined) {
+                    setHoveredBar(`${state.activeTooltipIndex}`);
+                    // 设置当前激活的区域
+                    if (state.activePayload?.[0]) {
+                      const activeBar = state.activePayload.find(item => item.value > 0);
+                      if (activeBar) {
+                        setActiveRegion(activeBar.name);
+                      }
+                    }
+                  }
+                }}
+                onMouseLeave={() => {
+                  setHoveredBar(null);
+                  setActiveRegion(null);
+                  setIsTooltipActive(false);
+                }}
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis
@@ -184,15 +298,17 @@ export function TrendChart({ className, onCountrySelect }: TrendChartProps) {
                   tick={{ fontSize: 12 }}
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [formatValue(value), name]}
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    borderColor: "hsl(var(--border))",
-                    borderRadius: 8,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  content={<CustomTooltip />}
+                  cursor={{ fill: 'rgba(0, 0, 0, 0.1)' }}
+                />
+                <Legend
+                  wrapperStyle={{ paddingTop: '20px' }}
+                  onClick={(data) => {
+                    if (onCountrySelect) {
+                      onCountrySelect(data.value);
+                    }
                   }}
                 />
-                <Legend />
                 {regions.map((region, index) => (
                   <Bar
                     key={region}
@@ -202,7 +318,7 @@ export function TrendChart({ className, onCountrySelect }: TrendChartProps) {
                     fill={regionColors[region] || defaultColor}
                     radius={index === regions.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
                     onClick={(data) => handleBarClick(data, index)}
-                    cursor="pointer"
+                    cursor={isTooltipActive ? "default" : "pointer"}
                   />
                 ))}
               </BarChart>
