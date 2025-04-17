@@ -3,14 +3,14 @@ import {
   ClientCommunication,
   ClientOrder,
   ClientSummary,
-  getClientById,
+  getClientByCustomerCode,
   getClientCommunications,
   getClientOrders,
   getClientSummary
-} from '@/services/clientService';
+} from '@/api/clientService';
 import { useCallback, useEffect, useState } from 'react';
 
-export function useClientData(clientId: number | null) {
+export function useClientData(customerCode: string | null) {
   const [client, setClient] = useState<Client | null>(null);
   const [communications, setCommunications] = useState<ClientCommunication[]>([]);
   const [orders, setOrders] = useState<ClientOrder[]>([]);
@@ -19,13 +19,13 @@ export function useClientData(clientId: number | null) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchClientData = useCallback(async () => {
-    if (!clientId) return;
+    if (!customerCode) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const clientData = await getClientById(clientId.toString());
+      const clientData = await getClientByCustomerCode(customerCode);
       if (!clientData) {
         setError('Client not found');
         return;
@@ -34,7 +34,7 @@ export function useClientData(clientId: number | null) {
       setClient(clientData);
 
       // Fetch communications
-      const commsData = await getClientCommunications(clientId.toString());
+      const commsData = await getClientCommunications(customerCode);
       setCommunications(commsData);
 
       // Fetch client summary
@@ -50,7 +50,7 @@ export function useClientData(clientId: number | null) {
     } finally {
       setIsLoading(false);
     }
-  }, [clientId]);
+  }, [customerCode]);
 
   useEffect(() => {
     fetchClientData();

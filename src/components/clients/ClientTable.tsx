@@ -26,7 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface ClientTableProps {
   clients?: any[];
   isLoading?: boolean;
-  onClientClick?: (clientId: string) => void;
+  onClientClick?: (customerCode: string) => void;
 }
 
 export function ClientTable({ clients = [], isLoading = false, onClientClick }: ClientTableProps) {
@@ -36,7 +36,7 @@ export function ClientTable({ clients = [], isLoading = false, onClientClick }: 
   const filteredClients = clients.filter((client) => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return true;
-    
+
     return (
       client.company?.toLowerCase().includes(query) ||
       client.name?.toLowerCase().includes(query) ||
@@ -55,17 +55,17 @@ export function ClientTable({ clients = [], isLoading = false, onClientClick }: 
     }
     return <Badge variant="outline">Unknown</Badge>;
   };
-  
+
   const renderScore = (score: number | null) => {
     if (!score) return 'N/A';
-    
+
     if (score >= 90) return <span className="font-semibold text-green-600">A+</span>;
     if (score >= 80) return <span className="font-semibold text-green-600">A</span>;
     if (score >= 70) return <span className="font-semibold text-green-500">B+</span>;
     if (score >= 60) return <span className="font-semibold text-yellow-500">B</span>;
     if (score >= 50) return <span className="font-semibold text-yellow-600">C+</span>;
     if (score >= 40) return <span className="font-semibold text-yellow-700">C</span>;
-    
+
     return <span className="font-semibold text-red-500">D</span>;
   };
 
@@ -120,9 +120,9 @@ export function ClientTable({ clients = [], isLoading = false, onClientClick }: 
         <div className="flex justify-between items-center mb-6">
           <div className="relative w-64">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search clients..." 
-              className="pl-10" 
+            <Input
+              placeholder="Search clients..."
+              className="pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -134,7 +134,7 @@ export function ClientTable({ clients = [], isLoading = false, onClientClick }: 
             <Button>Add Client</Button>
           </div>
         </div>
-        
+
         <div className="border rounded-md">
           <Table>
             <TableHeader>
@@ -150,10 +150,10 @@ export function ClientTable({ clients = [], isLoading = false, onClientClick }: 
             <TableBody>
               {filteredClients.length > 0 ? (
                 filteredClients.map((client) => (
-                  <TableRow 
-                    key={client.id}
+                  <TableRow
+                    key={client.customer_code}
                     className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleRowClick(client.id)}
+                    onClick={() => handleRowClick(client.customer_code)}
                   >
                     <TableCell className="font-medium">{client.company}</TableCell>
                     <TableCell>

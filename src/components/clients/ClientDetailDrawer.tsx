@@ -15,7 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useClientData } from "@/hooks/useClientData";
-import { ClientCommunication, updateSummary } from "@/services/clientService";
+import { ClientCommunication, updateSummary } from "@/api/clientService";
 import {
   BarChart2,
   Building,
@@ -41,12 +41,12 @@ import { toast } from "sonner";
 import { EditSummaryDialog } from "./EditSummaryDialog";
 
 interface ClientDetailDrawerProps {
-  clientId: string | null;
+  customerCode: string | null;
   onClose: () => void;
   open: boolean;
 }
 
-export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDrawerProps) {
+export function ClientDetailDrawer({ customerCode, onClose, open }: ClientDetailDrawerProps) {
   const [activeTab, setActiveTab] = useState("journey");
   const [editingCommunication, setEditingCommunication] = useState<{
     id: number;
@@ -54,7 +54,7 @@ export function ClientDetailDrawer({ clientId, onClose, open }: ClientDetailDraw
     tags: string[];
     weekLabel: string;
   } | null>(null);
-  const { client, communications, orders, summary, isLoading, error, refetch } = useClientData(clientId);
+  const { client, communications, orders, summary, isLoading, error, refetch } = useClientData(customerCode);
 
   if (!open) return null;
 

@@ -1,22 +1,20 @@
-
-import { X, ArrowUpDown, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
-  SheetClose,
 } from "@/components/ui/sheet";
 import {
   Table,
@@ -26,100 +24,74 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ArrowUpDown, Filter, X } from "lucide-react";
 
-interface Order {
-  id: string;
-  client: {
-    id: number;
-    name: string;
-  };
-  date: string;
+interface Customer {
+  customer_code: string;
+  company: string;
   amount: number;
-  country: string;
+}
+
+interface RegionSalesData {
+  id: string;
+  report_month: string;
+  region_name: string;
+  customers: Customer[];
+  region_total: number;
+  percentage: number;
 }
 
 interface OrdersSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onClientSelect?: (clientId: number) => void;
+  selectedMonth?: string;
+  selectedRegion?: string;
+  orders?: RegionSalesData[];
 }
 
-const recentOrders: Order[] = [
-  {
-    id: "ORD-2025-1245",
-    client: { id: 1, name: "Global Industries Inc." },
-    date: "2025-06-10",
-    amount: 125000,
-    country: "USA"
-  },
-  {
-    id: "ORD-2025-1244",
-    client: { id: 2, name: "Tech Solutions Ltd." },
-    date: "2025-06-09",
-    amount: 85000,
-    country: "UK"
-  },
-  {
-    id: "ORD-2025-1243",
-    client: { id: 3, name: "Premier Enterprises" },
-    date: "2025-06-08",
-    amount: 45000,
-    country: "Germany"
-  },
-  {
-    id: "ORD-2025-1242",
-    client: { id: 4, name: "Acme Manufacturing" },
-    date: "2025-06-07",
-    amount: 67000,
-    country: "USA"
-  },
-  {
-    id: "ORD-2025-1241",
-    client: { id: 5, name: "Smart Systems Corp." },
-    date: "2025-06-06",
-    amount: 92000,
-    country: "Canada"
-  },
-  {
-    id: "ORD-2025-1240",
-    client: { id: 6, name: "Future Electronics" },
-    date: "2025-06-05",
-    amount: 38000,
-    country: "Japan"
-  },
-  {
-    id: "ORD-2025-1239",
-    client: { id: 7, name: "Atlas Construction" },
-    date: "2025-06-05",
-    amount: 56000,
-    country: "USA"
-  },
-  {
-    id: "ORD-2025-1238",
-    client: { id: 8, name: "Pacific Shipping Co." },
-    date: "2025-06-04",
-    amount: 74000,
-    country: "Australia"
-  }
-];
-
-export function OrdersSidebar({ isOpen, onClose, onClientSelect }: OrdersSidebarProps) {
-  const handleClientClick = (clientId: number, event: React.MouseEvent) => {
+export function OrdersSidebar({
+  isOpen,
+  onClose,
+  selectedMonth,
+  selectedRegion,
+  orders = []
+}: OrdersSidebarProps) {
+  const handleClientClick = (clientId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    if (onClientSelect) {
-      onClientSelect(clientId);
-    }
+    // TODO: Implement client selection handler
   };
-  
+
+  // 获取所有客户的销售数据
+  const customerOrders = orders.flatMap(order =>
+    order.customers.map(customer => ({
+      id: customer.customer_code,
+      client: {
+        id: customer.customer_code,
+        name: customer.company
+      },
+      amount: customer.amount,
+      percentage: (customer.amount / order.region_total * 100).toFixed(2),
+      country: order.region_name
+    }))
+  );
+
+  const totalAmount = orders.reduce((sum, order) => sum + order.region_total, 0);
+
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-full sm:max-w-md md:max-w-lg lg:max-w-xl">
         <SheetHeader className="pb-4">
           <div className="flex items-center justify-between">
             <div>
-              <SheetTitle>Weekly New Orders</SheetTitle>
+              <SheetTitle>
+                {selectedMonth && selectedRegion
+                  ? `${selectedRegion}区域 - ${selectedMonth}月订单`
+                  : '订单详情'}
+              </SheetTitle>
               <SheetDescription>
-                Recent orders from the past 7 days
+                {selectedMonth && selectedRegion
+                  ? `显示${selectedRegion}区域在${selectedMonth}月的客户订单 (总额: ${totalAmount.toLocaleString('zh-CN', { style: 'currency', currency: 'CNY' })})`
+                  : '显示所选区域和月份的订单'}
               </SheetDescription>
             </div>
             <SheetClose asChild>
@@ -129,78 +101,90 @@ export function OrdersSidebar({ isOpen, onClose, onClientSelect }: OrdersSidebar
             </SheetClose>
           </div>
         </SheetHeader>
-        
+
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div className="relative flex-1">
-            <Input placeholder="Search orders..." />
+            <Input placeholder="搜索客户..." />
           </div>
-          
+
           <div className="flex gap-2">
             <Select defaultValue="all">
               <SelectTrigger className="w-[130px]">
                 <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Country" />
+                <SelectValue placeholder="筛选" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                <SelectItem value="usa">USA</SelectItem>
-                <SelectItem value="uk">UK</SelectItem>
-                <SelectItem value="germany">Germany</SelectItem>
-                <SelectItem value="canada">Canada</SelectItem>
-                <SelectItem value="japan">Japan</SelectItem>
-                <SelectItem value="australia">Australia</SelectItem>
+                <SelectItem value="all">全部客户</SelectItem>
+                <SelectItem value="high">高额订单</SelectItem>
+                <SelectItem value="low">低额订单</SelectItem>
               </SelectContent>
             </Select>
-            
-            <Select defaultValue="date-desc">
+
+            <Select defaultValue="amount-desc">
               <SelectTrigger className="w-[130px]">
                 <ArrowUpDown className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Sort By" />
+                <SelectValue placeholder="排序" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="date-desc">Date (New-Old)</SelectItem>
-                <SelectItem value="date-asc">Date (Old-New)</SelectItem>
-                <SelectItem value="amount-desc">Amount (High-Low)</SelectItem>
-                <SelectItem value="amount-asc">Amount (Low-High)</SelectItem>
+                <SelectItem value="amount-desc">金额 (高-低)</SelectItem>
+                <SelectItem value="amount-asc">金额 (低-高)</SelectItem>
+                <SelectItem value="name-asc">客户名称 (A-Z)</SelectItem>
+                <SelectItem value="name-desc">客户名称 (Z-A)</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
-        
+
         <Card>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Country</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>客户代码</TableHead>
+                  <TableHead>客户名称</TableHead>
+                  <TableHead>区域</TableHead>
+                  <TableHead className="text-right">销售金额</TableHead>
+                  <TableHead className="text-right">占比</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell 
-                      className="text-primary hover:underline cursor-pointer"
-                      onClick={(e) => handleClientClick(order.client.id, e)}
-                    >
-                      {order.client.name}
+                {customerOrders.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center">
+                      未找到订单数据
                     </TableCell>
-                    <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-                    <TableCell>{order.country}</TableCell>
-                    <TableCell className="text-right">${order.amount.toLocaleString()}</TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  customerOrders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">{order.id}</TableCell>
+                      <TableCell
+                        className="text-primary hover:underline cursor-pointer"
+                        onClick={(e) => handleClientClick(order.client.id, e)}
+                      >
+                        {order.client.name}
+                      </TableCell>
+                      <TableCell>{order.country}</TableCell>
+                      <TableCell className="text-right">
+                        {order.amount.toLocaleString('zh-CN', {
+                          style: 'currency',
+                          currency: 'CNY'
+                        })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {order.percentage}%
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
         </Card>
-        
+
         <div className="mt-4 text-center text-sm text-muted-foreground">
-          Showing 8 of 247 orders from the past week
+          显示 {customerOrders.length} 个客户的订单数据
+          {selectedMonth && selectedRegion && ` (${selectedRegion} - ${selectedMonth})`}
         </div>
       </SheetContent>
     </Sheet>

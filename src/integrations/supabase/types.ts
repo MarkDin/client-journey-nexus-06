@@ -115,43 +115,34 @@ export type Database = {
       }
       customer_extra: {
         Row: {
+          company_name: string | null
           created_at: string
+          customer_code: string
           id: number
-          trend_chart: string | null
+          long_trend_slope: number
+          name: string | null
+          order_amount_in_the_past_year: number
+          short_trend_slope: number
         }
         Insert: {
+          company_name?: string | null
           created_at?: string
+          customer_code: string
           id?: number
-          trend_chart?: string | null
+          long_trend_slope: number
+          name?: string | null
+          order_amount_in_the_past_year: number
+          short_trend_slope: number
         }
         Update: {
+          company_name?: string | null
           created_at?: string
+          customer_code?: string
           id?: number
-          trend_chart?: string | null
-        }
-        Relationships: []
-      }
-      customer_new: {
-        Row: {
-          company: string | null
-          created_at: string | null
-          email: string | null
-          id: string
-          name: string
-        }
-        Insert: {
-          company?: string | null
-          created_at?: string | null
-          email?: string | null
-          id: string
-          name: string
-        }
-        Update: {
-          company?: string | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          name?: string
+          long_trend_slope?: number
+          name?: string | null
+          order_amount_in_the_past_year?: number
+          short_trend_slope?: number
         }
         Relationships: []
       }
@@ -334,6 +325,41 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      monthly_client_data: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_code: string
+          customer_name: string | null
+          id: number
+          month: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          customer_code: string
+          customer_name?: string | null
+          id?: number
+          month: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_code?: string
+          customer_name?: string | null
+          id?: number
+          month?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_client_data_customer_code_fkey"
+            columns: ["customer_code"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["customer_code"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -537,6 +563,17 @@ export type Database = {
         Returns: {
           market: string
           count: number
+        }[]
+      }
+      get_monthly_region_sales: {
+        Args: { p_start_date?: string; p_end_date?: string }
+        Returns: {
+          sales_month: string
+          region: string
+          amount: number
+          customers: string[]
+          total_amount: number
+          percentage: number
         }[]
       }
       get_period_dates: {

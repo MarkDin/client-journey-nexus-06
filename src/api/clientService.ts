@@ -52,12 +52,12 @@ export interface ClientSummary {
   key_insights?: string[];
 }
 
-export async function getClientById(clientId: string): Promise<Client | null> {
+export async function getClientById(id: string): Promise<Client | null> {
   try {
     const { data, error } = await supabase
       .from('customers')
       .select('*')
-      .eq('id', clientId)
+      .eq('id', id)
       .single();
 
     if (error) {
@@ -72,12 +72,32 @@ export async function getClientById(clientId: string): Promise<Client | null> {
   }
 }
 
-export async function getClientCommunications(clientId: string): Promise<ClientCommunication[]> {
+export async function getClientByCustomerCode(customer_code: string): Promise<Client | null> {
+  try {
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('customer_code', customer_code)
+      .single();
+
+    if (error) {
+      console.error("Error fetching client:", error);
+      return null;
+    }
+
+    return data as Client;
+  } catch (error) {
+    console.error("Error in getClientByCustomerCode:", error);
+    return null;
+  }
+}
+
+export async function getClientCommunications(customer_code: string): Promise<ClientCommunication[]> {
   try {
     const { data, error } = await supabase
       .from('client_communications')
       .select('*')
-      .eq('client_id', clientId)
+      .eq('customer_code', customer_code)
       .order('week_start', { ascending: false });
 
     if (error) {

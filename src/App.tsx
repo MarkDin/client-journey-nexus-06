@@ -20,7 +20,7 @@ import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 
 // Create a wrapper component that includes the ClientDetailDrawer
 const AppWithClientDrawer = () => {
-  const { selectedClientId, isDrawerOpen, closeClientDrawer } = useClientDrawer();
+  const { selectedClientCode, isDrawerOpen, closeClientDrawer } = useClientDrawer();
 
   return (
     <>
@@ -40,7 +40,7 @@ const AppWithClientDrawer = () => {
 
       {/* Global client detail drawer */}
       <ClientDetailDrawer
-        clientId={selectedClientId}
+        customerCode={selectedClientCode}
         open={isDrawerOpen}
         onClose={closeClientDrawer}
       />
