@@ -24,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useClientDrawerStore } from "@/store/useClientDrawerStore";
 import { ArrowUpDown, Filter, X } from "lucide-react";
 
 interface Customer {
@@ -56,9 +57,11 @@ export function OrdersSidebar({
   selectedRegion,
   orders = []
 }: OrdersSidebarProps) {
+  const openDrawer = useClientDrawerStore(state => state.openDrawer);
+
   const handleClientClick = (clientId: string, event: React.MouseEvent) => {
     event.stopPropagation();
-    // TODO: Implement client selection handler
+    openDrawer(clientId);
   };
 
   // 获取所有客户的销售数据

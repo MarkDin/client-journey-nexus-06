@@ -1,26 +1,27 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Index";
-import Activities from "./pages/Activities";
-import Clients from "./pages/Clients";
-import ClientDetails from "./pages/ClientDetails";
-import Orders from "./pages/Orders";
-import Analytics from "./pages/Analytics";
-import NotFound from "./pages/NotFound";
-import Shipments from "./pages/Shipments";
-import Communication from "./pages/Communication";
-import Support from "./pages/Support";
-import { ClientDrawerProvider } from "@/contexts/ClientDrawerContext";
 import { ClientDetailDrawer } from "@/components/clients/ClientDetailDrawer";
-import { useClientDrawer } from "@/contexts/ClientDrawerContext";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { useGoogleAnalytics } from "@/hooks/useGoogleAnalytics";
+import { useClientDrawerStore } from "@/store/useClientDrawerStore";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import ClientDetails from "./pages/ClientDetails";
+import Clients from "./pages/Clients";
+import Dashboard from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import Orders from "./pages/Orders";
 
-// Create a wrapper component that includes the ClientDetailDrawer
+// Create a wrapper component that includes the ClientDetailDrawer and tracks page views
 const AppWithClientDrawer = () => {
-  const { selectedClientCode, isDrawerOpen, closeClientDrawer } = useClientDrawer();
+  const { customerCode, isOpen, closeDrawer } = useClientDrawerStore();
+  const location = useLocation();
+  const { trackPageView } = useGoogleAnalytics();
+
+  useEffect(() => {
+    trackPageView(location.pathname);
+  }, [location, trackPageView]);
 
   return (
     <>
@@ -30,7 +31,6 @@ const AppWithClientDrawer = () => {
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/:id" element={<ClientDetails />} />
         <Route path="/orders" element={<Orders />} />
-        <Route path="/analytics" element={<Analytics />} />
         {/* <Route path="/shipments" element={<Shipments />} /> */}
         {/* <Route path="/communication" element={<Communication />} /> */}
         {/* <Route path="/support" element={<Support />} /> */}
@@ -40,9 +40,9 @@ const AppWithClientDrawer = () => {
 
       {/* Global client detail drawer */}
       <ClientDetailDrawer
-        customerCode={selectedClientCode}
-        open={isDrawerOpen}
-        onClose={closeClientDrawer}
+        customerCode={customerCode}
+        open={isOpen}
+        onClose={closeDrawer}
       />
     </>
   );
@@ -56,13 +56,11 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <ClientDrawerProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AppWithClientDrawer />
-          </BrowserRouter>
-        </ClientDrawerProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppWithClientDrawer />
+        </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
   );

@@ -9,16 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { useClientDrawer } from "@/contexts/ClientDrawerContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useClientDrawerStore } from "@/store/useClientDrawerStore";
 import { ClientSummary, Email, WeeklyThread } from "@/types/communication";
 import { format } from "date-fns";
 import { Calendar, MessageSquare, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function Communication() {
-  const { openClientDrawer } = useClientDrawer();
+  const openDrawer = useClientDrawerStore(state => state.openDrawer);
   const { toast } = useToast();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedThread, setSelectedThread] = useState<WeeklyThread | null>(null);
@@ -43,7 +43,7 @@ export default function Communication() {
   const handleClientClick = (clientId: string) => {
     const client = clientSummaries.find(c => c.clientId === clientId);
     if (client) {
-      openClientDrawer(clientId);
+      openDrawer(clientId);
     }
   };
 

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMonthlySalesData } from "@/hooks/useMonthlySalesData";
+import { useClientDrawerStore } from "@/store/useClientDrawerStore";
 import { useState } from "react";
 import {
   Bar,
@@ -100,6 +101,7 @@ export function TrendChart({ className, onCountrySelect }: TrendChartProps) {
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
   const [selectedData, setSelectedData] = useState<{ month: string; region: string; orders: any[] } | null>(null);
   const [isTooltipActive, setIsTooltipActive] = useState(false);
+  const openDrawer = useClientDrawerStore(state => state.openDrawer);
 
   const handleBarClick = (data: any, index: number) => {
     if (isTooltipActive) return;
@@ -121,6 +123,23 @@ export function TrendChart({ className, onCountrySelect }: TrendChartProps) {
     }
   };
 
+  const handleCountryClick = (entry: any, month: string) => {
+    const rawData = data.find(item => item.month === month)?.rawData || [];
+    const filteredOrders = rawData.filter((item: any) =>
+      item.region_name === entry.name
+    );
+
+    setSelectedData({
+      month,
+      region: entry.name,
+      orders: filteredOrders
+    });
+
+    if (onCountrySelect) {
+      onCountrySelect(entry.name);
+    }
+  };
+
   // 自定义 Tooltip 内容
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -128,23 +147,6 @@ export function TrendChart({ className, onCountrySelect }: TrendChartProps) {
       const nonZeroEntries = payload
         .filter((entry: any) => entry.value > 0)
         .sort((a: any, b: any) => b.value - a.value);
-
-      const handleCountryClick = (entry: any) => {
-        const rawData = data.find(item => item.month === label)?.rawData || [];
-        const filteredOrders = rawData.filter((item: any) =>
-          item.region_name === entry.name
-        );
-
-        setSelectedData({
-          month: label,
-          region: entry.name,
-          orders: filteredOrders
-        });
-
-        if (onCountrySelect) {
-          onCountrySelect(entry.name);
-        }
-      };
 
       return (
         <div
@@ -171,7 +173,7 @@ export function TrendChart({ className, onCountrySelect }: TrendChartProps) {
                   key={index}
                   className={`flex items-center justify-between gap-4 py-2 rounded px-2 cursor-pointer transition-all duration-200
                     ${isActive ? 'bg-accent' : 'hover:bg-accent/50'}`}
-                  onClick={() => handleCountryClick(entry)}
+                  onClick={() => handleCountryClick(entry, label)}
                   onMouseEnter={() => setActiveRegion(entry.name)}
                   onMouseLeave={() => setActiveRegion(null)}
                 >

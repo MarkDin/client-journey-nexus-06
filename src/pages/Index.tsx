@@ -1,21 +1,18 @@
-
-import { useState } from "react";
-import { DollarSign, Package } from "lucide-react";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { CustomerQuadrantChart } from "@/components/dashboard/CustomerQuadrantChart";
+import { OrdersSidebar } from "@/components/dashboard/OrdersSidebar";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { TrendChart } from "@/components/dashboard/TrendChart";
-import { OrdersSidebar } from "@/components/dashboard/OrdersSidebar";
-import { CustomerQuadrantChart } from "@/components/dashboard/CustomerQuadrantChart";
-import { useClientDrawer } from "@/contexts/ClientDrawerContext";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useClientDrawerStore } from "@/store/useClientDrawerStore";
+import { DollarSign, Package } from "lucide-react";
+import { useState } from "react";
 
 const Dashboard = () => {
   const [ordersSidebarOpen, setOrdersSidebarOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
-  const {
-    openClientDrawer
-  } = useClientDrawer();
+  const openDrawer = useClientDrawerStore(state => state.openDrawer);
 
   const toggleOrdersSidebar = () => {
     setOrdersSidebarOpen(!ordersSidebarOpen);
@@ -27,7 +24,7 @@ const Dashboard = () => {
   };
 
   const handleClientCustomerCodeSelect = (customerCode: string) => {
-    openClientDrawer(customerCode);
+    openDrawer(customerCode);
   };
 
   return <AppLayout>
