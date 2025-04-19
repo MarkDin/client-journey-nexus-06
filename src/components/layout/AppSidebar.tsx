@@ -43,7 +43,7 @@ export function AppSidebar() {
     // },
     {
       name: "分析",
-      href: "/analytics",
+      href: "/visit-info",
       icon: <BarChart2 className="h-5 w-5" />
     },
     // {

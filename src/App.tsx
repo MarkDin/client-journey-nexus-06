@@ -7,12 +7,12 @@ import { useClientDrawerStore } from "@/store/useClientDrawerStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
-import ClientDetails from "./pages/ClientDetails";
-import Clients from "./pages/Clients";
-import Dashboard from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Orders from "./pages/Orders";
-
+import ClientDetails from "@/pages/ClientDetails";
+import Clients from "@/pages/Clients";
+import Dashboard from "@/pages/Index";
+import NotFound from "@/pages/NotFound";
+import Orders from "@/pages/Orders";
+import VisitInfo from "@/pages/VisitInfo";
 // Create a wrapper component that includes the ClientDetailDrawer and tracks page views
 const AppWithClientDrawer = () => {
   const { customerCode, isOpen, closeDrawer } = useClientDrawerStore();
@@ -27,7 +27,7 @@ const AppWithClientDrawer = () => {
     <>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        {/* <Route path="/activities" element={<Activities />} /> */}
+        <Route path="/visit-info" element={<VisitInfo />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/:id" element={<ClientDetails />} />
         <Route path="/orders" element={<Orders />} />
