@@ -20,7 +20,7 @@ const Dashboard = () => {
 
   const handleCountrySelect = (country: string) => {
     setSelectedCountry(country);
-    setOrdersSidebarOpen(true);
+    // setOrdersSidebarOpen(true);
   };
 
   const handleClientCustomerCodeSelect = (customerCode: string) => {
