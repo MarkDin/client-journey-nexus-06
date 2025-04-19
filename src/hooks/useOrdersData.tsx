@@ -1,6 +1,5 @@
-
-import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from 'react';
 
 export interface Order {
   id: string;
@@ -12,10 +11,16 @@ export interface Order {
   status?: string;
 }
 
-export function useOrdersData() {
+interface UseOrdersDataProps {
+  page?: number;
+  pageSize?: number;
+}
+
+export function useOrdersData({ page = 1, pageSize = 10 }: UseOrdersDataProps = {}) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     async function fetchOrders() {
@@ -23,10 +28,23 @@ export function useOrdersData() {
         setIsLoading(true);
         setError(null);
 
+        // 首先获取总数
+        const { count, error: countError } = await supabase
+          .from('customer_orders')
+          .select('*', { count: 'exact', head: true });
+
+        if (countError) {
+          throw countError;
+        }
+
+        setTotalCount(count || 0);
+
+        // 然后获取分页数据
         const { data: ordersData, error: ordersError } = await supabase
           .from('customer_orders')
           .select('id, customer_code, customer_name, order_month, order_amount, material')
-          .order('order_month', { ascending: false });
+          .order('order_month', { ascending: false })
+          .range((page - 1) * pageSize, page * pageSize - 1);
 
         if (ordersError) {
           throw ordersError;
@@ -57,7 +75,17 @@ export function useOrdersData() {
     }
 
     fetchOrders();
-  }, []);
+  }, [page, pageSize]);
 
-  return { orders, isLoading, error };
+  return { 
+    orders, 
+    isLoading, 
+    error,
+    pagination: {
+      total: totalCount,
+      pageSize,
+      current: page,
+      totalPages: Math.ceil(totalCount / pageSize)
+    }
+  };
 }

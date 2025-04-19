@@ -5,6 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   Table,
   TableBody,
   TableCell,
@@ -15,11 +24,12 @@ import {
 import { useOrdersData } from "@/hooks/useOrdersData";
 import { useClientDrawerStore } from "@/store/useClientDrawerStore";
 import { Download, Filter, PlusCircle, Search, Upload } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 const Orders = () => {
-  const { orders, isLoading } = useOrdersData();
+  const [currentPage, setCurrentPage] = useState(1);
+  const { orders, isLoading, pagination } = useOrdersData({ page: currentPage, pageSize: 10 });
   const openDrawer = useClientDrawerStore(state => state.openDrawer);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,18 +44,11 @@ const Orders = () => {
     if (!file) return;
 
     if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls') && !file.name.endsWith('.csv')) {
-      toast({
-        title: "Invalid file format",
-        description: "Please select an Excel or CSV file",
-        variant: "destructive",
-      });
+      toast.error("请选择Excel或CSV文件");
       return;
     }
 
-    toast({
-      title: "Import successful",
-      description: `Imported ${file.name}`,
-    });
+    toast.success(`已导入 ${file.name}`);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -55,6 +58,10 @@ const Orders = () => {
   const handleClientClick = (clientId: string, event: React.MouseEvent) => {
     event.stopPropagation();
     openDrawer(clientId);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -167,6 +174,58 @@ const Orders = () => {
             </TableBody>
           </Table>
         </div>
+
+        {!isLoading && orders.length > 0 && (
+          <div className="py-4 border-t">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                    aria-disabled={currentPage === 1}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+                
+                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    // 显示第一页、最后一页，和当前页附近的页码
+                    return page === 1 || 
+                           page === pagination.totalPages || 
+                           Math.abs(page - currentPage) <= 1;
+                  })
+                  .map((page, index, array) => {
+                    // 如果页码不连续，显示省略号
+                    if (index > 0 && page - array[index - 1] > 1) {
+                      return (
+                        <PaginationItem key={`ellipsis-${page}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => handlePageChange(page)}
+                          isActive={currentPage === page}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => currentPage < pagination.totalPages && handlePageChange(currentPage + 1)}
+                    aria-disabled={currentPage === pagination.totalPages}
+                    className={currentPage === pagination.totalPages ? 'pointer-events-none opacity-50' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </Card>
     </AppLayout>
   );
