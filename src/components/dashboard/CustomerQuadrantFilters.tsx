@@ -42,7 +42,6 @@ export function CustomerQuadrantFilters({
     onFiltersChange({ 
       ...filters, 
       country: value === "all" ? undefined : value,
-      // 如果选中的销售不在筛选后的列表中，清除销售筛选
       sales: value === "all" ? filters.sales : 
         (salesPeople.includes(filters.sales || "") ? filters.sales : undefined)
     });
@@ -52,7 +51,6 @@ export function CustomerQuadrantFilters({
     onFiltersChange({ 
       ...filters, 
       sales: value === "all" ? undefined : value,
-      // 如果选中的国家不在筛选后的列表中，清除国家筛选
       country: value === "all" ? filters.country :
         (countries.includes(filters.country || "") ? filters.country : undefined)
     });
@@ -68,43 +66,40 @@ export function CustomerQuadrantFilters({
   , [data]);
 
   return (
-    <div className="flex gap-4 mb-4">
-      <div className="flex-1">
-        <Select
-          value={filters.country || "all"}
-          onValueChange={handleCountryChange}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="选择国家" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部国家 ({allCountries.length})</SelectItem>
-            {countries.map((country) => (
-              <SelectItem key={country} value={country}>
-                {country}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex-1">
-        <Select
-          value={filters.sales || "all"}
-          onValueChange={handleSalesChange}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="选择销售" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部销售 ({allSalesPeople.length})</SelectItem>
-            {salesPeople.map((sales) => (
-              <SelectItem key={sales} value={sales}>
-                {sales}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+    <div className="flex flex-row gap-2 mb-4 ml-4">
+      <Select
+        value={filters.country || "all"}
+        onValueChange={handleCountryChange}
+      >
+        <SelectTrigger className="w-[120px] bg-white border-gray-200">
+          <SelectValue placeholder="选择国家" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">全部国家</SelectItem>
+          {countries.map((country) => (
+            <SelectItem key={country} value={country}>
+              {country}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
+        value={filters.sales || "all"}
+        onValueChange={handleSalesChange}
+      >
+        <SelectTrigger className="w-[120px] bg-white border-gray-200">
+          <SelectValue placeholder="选择销售" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">全部销售</SelectItem>
+          {salesPeople.map((sales) => (
+            <SelectItem key={sales} value={sales}>
+              {sales}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 } 
