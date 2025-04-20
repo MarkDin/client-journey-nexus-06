@@ -1,32 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from 'react';
+import { Customer } from "@/types/supabase";
 
-export interface Client {
-  id: string;
-  customer_code: string;
-  name: string;
-  company: string;
-  email: string | null;
-  phone: string | null;
-  status: number | null;
-  industry: string | null;
-  region: string | null;
-  credit_level: string | null;
-  credit_limit: number | null;
-  credit_used: number | null;
-  purchase_count: number | null;
-  last_order: string | null;
-  next_meeting: string | null;
-  tags: string[] | null;
-}
 
 interface UseClientsDataProps {
   page?: number;
   pageSize?: number;
 }
 
-export function useClientsData({ page = 1, pageSize = 10 }: UseClientsDataProps = {}) {
-  const [clients, setClients] = useState<Client[]>([]);
+export function useClientsData({ page = 1, pageSize = 20 }: UseClientsDataProps = {}) {
+  const [clients, setClients] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalCount, setTotalCount] = useState(0);
@@ -51,24 +34,7 @@ export function useClientsData({ page = 1, pageSize = 10 }: UseClientsDataProps 
         // 获取分页数据
         const { data: clientsData, error: clientsError } = await supabase
           .from('customers')
-          .select(`
-            id,
-            customer_code,
-            name,
-            company,
-            email,
-            phone,
-            status,
-            industry,
-            region,
-            credit_level,
-            credit_limit,
-            credit_used,
-            purchase_count,
-            last_order,
-            next_meeting,
-            tags
-          `)
+          .select('*')
           .order('company', { ascending: true })
           .range((page - 1) * pageSize, page * pageSize - 1);
 

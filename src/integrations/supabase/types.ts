@@ -283,6 +283,7 @@ export type Database = {
           industry: string | null
           introduction: string | null
           is_delay: string | null
+          key_insights: string[] | null
           last_order: string | null
           name: string
           next_meeting: string | null
@@ -291,7 +292,6 @@ export type Database = {
           purchase_count: number | null
           region: string | null
           sales: string | null
-          sales_rep: string | null
           score: number | null
           short_name: string | null
           status: number | null
@@ -315,6 +315,7 @@ export type Database = {
           industry?: string | null
           introduction?: string | null
           is_delay?: string | null
+          key_insights?: string[] | null
           last_order?: string | null
           name?: string
           next_meeting?: string | null
@@ -323,7 +324,6 @@ export type Database = {
           purchase_count?: number | null
           region?: string | null
           sales?: string | null
-          sales_rep?: string | null
           score?: number | null
           short_name?: string | null
           status?: number | null
@@ -347,6 +347,7 @@ export type Database = {
           industry?: string | null
           introduction?: string | null
           is_delay?: string | null
+          key_insights?: string[] | null
           last_order?: string | null
           name?: string
           next_meeting?: string | null
@@ -355,7 +356,6 @@ export type Database = {
           purchase_count?: number | null
           region?: string | null
           sales?: string | null
-          sales_rep?: string | null
           score?: number | null
           short_name?: string | null
           status?: number | null
@@ -534,6 +534,7 @@ export type Database = {
           customer_name: string | null
           id: number
           month: string
+          quarter: string | null
         }
         Insert: {
           amount: number
@@ -542,6 +543,7 @@ export type Database = {
           customer_name?: string | null
           id?: number
           month: string
+          quarter?: string | null
         }
         Update: {
           amount?: number
@@ -550,6 +552,7 @@ export type Database = {
           customer_name?: string | null
           id?: number
           month?: string
+          quarter?: string | null
         }
         Relationships: [
           {
@@ -560,6 +563,74 @@ export type Database = {
             referencedColumns: ["customer_code"]
           },
         ]
+      }
+      monthly_client_data_duplicate: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_code: string
+          customer_name: string | null
+          id: number
+          month: string
+          quarter: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          customer_code: string
+          customer_name?: string | null
+          id?: number
+          month: string
+          quarter?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_code?: string
+          customer_name?: string | null
+          id?: number
+          month?: string
+          quarter?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_client_data_duplicate_customer_code_fkey"
+            columns: ["customer_code"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["customer_code"]
+          },
+        ]
+      }
+      monthly_client_data_rows_processed: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          customer_code: string | null
+          customer_name: string | null
+          id: number | null
+          month: string | null
+          quarter: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          customer_code?: string | null
+          customer_name?: string | null
+          id?: number | null
+          month?: string | null
+          quarter?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          customer_code?: string | null
+          customer_name?: string | null
+          id?: number | null
+          month?: string | null
+          quarter?: string | null
+        }
+        Relationships: []
       }
       products: {
         Row: {
