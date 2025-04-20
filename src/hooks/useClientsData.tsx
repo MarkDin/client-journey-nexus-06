@@ -14,7 +14,6 @@ export interface Client {
   credit_level: string | null;
   credit_limit: number | null;
   credit_used: number | null;
-  lifetime_value: number | null;
   purchase_count: number | null;
   last_order: string | null;
   next_meeting: string | null;
@@ -65,7 +64,6 @@ export function useClientsData({ page = 1, pageSize = 10 }: UseClientsDataProps 
             credit_level,
             credit_limit,
             credit_used,
-            lifetime_value,
             purchase_count,
             last_order,
             next_meeting,

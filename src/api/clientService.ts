@@ -14,6 +14,7 @@ export interface Client {
   phone?: string;
   tags?: string[];
   ai_summary?: string;
+  key_insights?: string[];
   next_meeting?: string;
   sales_rep?: string;
   last_order?: string;

@@ -113,6 +113,51 @@ export type Database = {
           },
         ]
       }
+      clients_full_info: {
+        Row: {
+          client_resource: string | null
+          customer_code: string | null
+          first_order_time: string | null
+          has_complaints: string | null
+          introduction: string | null
+          is_delay: string | null
+          name: string | null
+          official_website: string | null
+          region: string | null
+          sales: string | null
+          short_name: string | null
+          stock_cash: string | null
+        }
+        Insert: {
+          client_resource?: string | null
+          customer_code?: string | null
+          first_order_time?: string | null
+          has_complaints?: string | null
+          introduction?: string | null
+          is_delay?: string | null
+          name?: string | null
+          official_website?: string | null
+          region?: string | null
+          sales?: string | null
+          short_name?: string | null
+          stock_cash?: string | null
+        }
+        Update: {
+          client_resource?: string | null
+          customer_code?: string | null
+          first_order_time?: string | null
+          has_complaints?: string | null
+          introduction?: string | null
+          is_delay?: string | null
+          name?: string | null
+          official_website?: string | null
+          region?: string | null
+          sales?: string | null
+          short_name?: string | null
+          stock_cash?: string | null
+        }
+        Relationships: []
+      }
       clients_quarter_trend: {
         Row: {
           client_name: string | null
@@ -165,7 +210,15 @@ export type Database = {
           order_amount_in_the_past_year?: number
           short_trend_slope?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customer_extra_customer_code_fkey"
+            columns: ["customer_code"]
+            isOneToOne: true
+            referencedRelation: "customers"
+            referencedColumns: ["customer_code"]
+          },
+        ]
       }
       customer_orders: {
         Row: {
@@ -216,6 +269,7 @@ export type Database = {
         Row: {
           address: string | null
           ai_summary: string | null
+          client_resource: string | null
           company: string
           created_at: string | null
           credit_level: string | null
@@ -223,12 +277,16 @@ export type Database = {
           credit_used: number | null
           customer_code: string
           email: string | null
+          first_order_time: string | null
+          has_complaints: string | null
           id: string
           industry: string | null
+          introduction: string | null
+          is_delay: string | null
           last_order: string | null
-          lifetime_value: number | null
           name: string
           next_meeting: string | null
+          official_website: string | null
           phone: string | null
           purchase_count: number | null
           region: string | null
@@ -237,24 +295,30 @@ export type Database = {
           score: number | null
           short_name: string | null
           status: number | null
+          stock_cash: string | null
           tags: string[] | null
         }
         Insert: {
           address?: string | null
           ai_summary?: string | null
+          client_resource?: string | null
           company?: string
           created_at?: string | null
           credit_level?: string | null
           credit_limit?: number | null
           credit_used?: number | null
-          customer_code?: string
+          customer_code: string
           email?: string | null
+          first_order_time?: string | null
+          has_complaints?: string | null
           id?: string
           industry?: string | null
+          introduction?: string | null
+          is_delay?: string | null
           last_order?: string | null
-          lifetime_value?: number | null
           name?: string
           next_meeting?: string | null
+          official_website?: string | null
           phone?: string | null
           purchase_count?: number | null
           region?: string | null
@@ -263,11 +327,13 @@ export type Database = {
           score?: number | null
           short_name?: string | null
           status?: number | null
+          stock_cash?: string | null
           tags?: string[] | null
         }
         Update: {
           address?: string | null
           ai_summary?: string | null
+          client_resource?: string | null
           company?: string
           created_at?: string | null
           credit_level?: string | null
@@ -275,12 +341,16 @@ export type Database = {
           credit_used?: number | null
           customer_code?: string
           email?: string | null
+          first_order_time?: string | null
+          has_complaints?: string | null
           id?: string
           industry?: string | null
+          introduction?: string | null
+          is_delay?: string | null
           last_order?: string | null
-          lifetime_value?: number | null
           name?: string
           next_meeting?: string | null
+          official_website?: string | null
           phone?: string | null
           purchase_count?: number | null
           region?: string | null
@@ -289,6 +359,109 @@ export type Database = {
           score?: number | null
           short_name?: string | null
           status?: number | null
+          stock_cash?: string | null
+          tags?: string[] | null
+        }
+        Relationships: []
+      }
+      customers_duplicate: {
+        Row: {
+          address: string | null
+          ai_summary: string | null
+          client_resource: string | null
+          company: string
+          created_at: string | null
+          credit_level: string | null
+          credit_limit: number | null
+          credit_used: number | null
+          customer_code: string
+          email: string | null
+          first_order_time: string | null
+          has_complaints: string | null
+          id: string
+          industry: string | null
+          introduction: string | null
+          is_delay: string | null
+          last_order: string | null
+          lifetime_value: number | null
+          name: string
+          next_meeting: string | null
+          official_website: string | null
+          phone: string | null
+          purchase_count: number | null
+          region: string | null
+          sales: string | null
+          sales_rep: string | null
+          score: number | null
+          short_name: string | null
+          status: number | null
+          stock_cash: string | null
+          tags: string[] | null
+        }
+        Insert: {
+          address?: string | null
+          ai_summary?: string | null
+          client_resource?: string | null
+          company?: string
+          created_at?: string | null
+          credit_level?: string | null
+          credit_limit?: number | null
+          credit_used?: number | null
+          customer_code?: string
+          email?: string | null
+          first_order_time?: string | null
+          has_complaints?: string | null
+          id?: string
+          industry?: string | null
+          introduction?: string | null
+          is_delay?: string | null
+          last_order?: string | null
+          lifetime_value?: number | null
+          name?: string
+          next_meeting?: string | null
+          official_website?: string | null
+          phone?: string | null
+          purchase_count?: number | null
+          region?: string | null
+          sales?: string | null
+          sales_rep?: string | null
+          score?: number | null
+          short_name?: string | null
+          status?: number | null
+          stock_cash?: string | null
+          tags?: string[] | null
+        }
+        Update: {
+          address?: string | null
+          ai_summary?: string | null
+          client_resource?: string | null
+          company?: string
+          created_at?: string | null
+          credit_level?: string | null
+          credit_limit?: number | null
+          credit_used?: number | null
+          customer_code?: string
+          email?: string | null
+          first_order_time?: string | null
+          has_complaints?: string | null
+          id?: string
+          industry?: string | null
+          introduction?: string | null
+          is_delay?: string | null
+          last_order?: string | null
+          lifetime_value?: number | null
+          name?: string
+          next_meeting?: string | null
+          official_website?: string | null
+          phone?: string | null
+          purchase_count?: number | null
+          region?: string | null
+          sales?: string | null
+          sales_rep?: string | null
+          score?: number | null
+          short_name?: string | null
+          status?: number | null
+          stock_cash?: string | null
           tags?: string[] | null
         }
         Relationships: []

@@ -118,7 +118,6 @@ const fetchPaginatedData = async ({
           credit_level: customer.credit_level,
           credit_limit: customer.credit_limit,
           credit_used: customer.credit_used,
-          lifetime_value: customer.lifetime_value,
           purchase_count: customer.purchase_count,
           last_order: customer.last_order,
           next_meeting: customer.next_meeting,

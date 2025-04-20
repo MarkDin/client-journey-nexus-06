@@ -2,11 +2,9 @@ import {
   Client,
   ClientCommunication,
   ClientOrder,
-  ClientSummary,
   getClientByCustomerCode,
   getClientCommunications,
   getClientOrders,
-  getClientSummary
 } from '@/api/clientService';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -14,13 +12,14 @@ export function useClientData(customerCode: string | null) {
   const [client, setClient] = useState<Client | null>(null);
   const [communications, setCommunications] = useState<ClientCommunication[]>([]);
   const [orders, setOrders] = useState<ClientOrder[]>([]);
-  const [summary, setSummary] = useState<ClientSummary | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingCommunications, setIsLoadingCommunications] = useState<boolean>(false);
+  const [isLoadingOrders, setIsLoadingOrders] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchClientData = useCallback(async () => {
+  // 获取基础客户信息
+  const fetchClientBasicData = useCallback(async () => {
     if (!customerCode) return;
-
     setIsLoading(true);
     setError(null);
 
@@ -30,39 +29,64 @@ export function useClientData(customerCode: string | null) {
         setError('Client not found');
         return;
       }
-
       setClient(clientData);
-
-      // Fetch communications
-      const commsData = await getClientCommunications(customerCode);
-      setCommunications(commsData);
-
-      // Fetch client summary
-      const summaryData = await getClientSummary(clientData.id);
-      setSummary(summaryData);
-
-      // Fetch orders
-      const ordersData = await getClientOrders(clientData.customer_code);
-      setOrders(ordersData);
     } catch (err) {
       setError('Failed to fetch client data');
-      console.error('Error in fetchClientData:', err);
+      console.error('Error in fetchClientBasicData:', err);
     } finally {
       setIsLoading(false);
     }
   }, [customerCode]);
 
+  // 获取通信记录
+  const fetchCommunications = useCallback(async () => {
+    if (!customerCode) return;
+    setIsLoadingCommunications(true);
+
+    try {
+      const commsData = await getClientCommunications(customerCode);
+      setCommunications(commsData);
+    } catch (err) {
+      console.error('Error fetching communications:', err);
+    } finally {
+      setIsLoadingCommunications(false);
+    }
+  }, [customerCode]);
+
+  // 获取订单数据
+  const fetchOrders = useCallback(async () => {
+    if (!client?.customer_code) return;
+    setIsLoadingOrders(true);
+
+    try {
+      const ordersData = await getClientOrders(client.customer_code);
+      setOrders(ordersData);
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+    } finally {
+      setIsLoadingOrders(false);
+    }
+  }, [client?.customer_code]);
+
+  // 初始化时只加载基础数据
   useEffect(() => {
-    fetchClientData();
-  }, [fetchClientData]);
+    fetchClientBasicData();
+  }, [fetchClientBasicData]);
 
   return {
     client,
     communications,
     orders,
-    summary,  // 新增返回值
+    summary: client ? {
+      ai_summary: client.ai_summary,
+      key_insights: client.key_insights || []
+    } : null,
     isLoading,
+    isLoadingCommunications,
+    isLoadingOrders,
     error,
-    refetch: fetchClientData
+    fetchCommunications,
+    fetchOrders,
+    refetch: fetchClientBasicData
   };
 }
