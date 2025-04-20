@@ -1,9 +1,9 @@
 import { ClientCommunication, updateSummary } from "@/api/clientService";
+import { ClientBasicInfo } from "@/components/clients/ClientBasicInfo";
 import { OrderTrendChart } from "@/components/clients/OrderTrendChart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -19,22 +19,14 @@ import { useClientData } from "@/hooks/useClientData";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BarChart2,
-  Building,
-  Calendar,
   Clock,
-  CreditCard,
   DollarSign,
   Download,
   Loader2,
-  Mail,
-  MapPin,
   MessageSquare,
   Paperclip,
   Pencil,
-  Phone,
   PieChart,
-  ShoppingBag,
-  User,
   X
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -189,90 +181,7 @@ export function ClientDetailDrawer({ customerCode, onClose, open }: ClientDetail
 
         <ScrollArea className="h-[calc(100vh-80px)] p-4">
           <div className="p-4">
-            <Card className="mb-4">
-              <CardContent className="p-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Primary Contact</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <p className="font-medium">{client.name}</p>
-                    </div>
-
-                    <div className="flex flex-col gap-1 mt-3">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <p className="text-sm">{client.email || "No email provided"}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <p className="text-sm">{client.phone || "No phone provided"}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-muted-foreground">Client Details</p>
-                    <div className="space-y-1 mt-1">
-                      <div className="flex items-center gap-2">
-                        <Building className="h-4 w-4 text-muted-foreground" />
-                        <p className="text-sm">Since {new Date(client.created_at || "").getFullYear()}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <p className="text-sm">{client.address || "No address provided"}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <p className="text-sm">Next meeting: {client.next_meeting ?
-                          new Date(client.next_meeting).toLocaleString() :
-                          "Not scheduled"}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-muted-foreground">Credit Status</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <CreditCard className="h-4 w-4 text-muted-foreground" />
-                      <p className="font-medium">{client.credit_level || "Not set"}</p>
-                    </div>
-
-                    <div className="mt-2">
-                      <div className="flex justify-between text-xs mb-1">
-                        <span>Credit Used</span>
-                        <span>${client.credit_used?.toLocaleString() || 0} of ${client.credit_limit?.toLocaleString() || 0}</span>
-                      </div>
-                      <Progress value={creditUsagePercentage} className="h-2" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-muted-foreground">Last Order</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-                      <p className="font-medium">
-                        ${formattedOrders.length > 0 ? formattedOrders[0].amount.toLocaleString() : "No orders"}
-                      </p>
-                    </div>
-                    {formattedOrders.length > 0 && (
-                      <p className="text-xs text-muted-foreground ml-6">
-                        {formattedOrders[0].id} · {formattedOrders[0].date}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground mb-2">Tags</p>
-                  <div className="flex flex-wrap gap-2">
-                    {client.tags && client.tags.length > 0 ? client.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary">{tag}</Badge>
-                    )) : <span className="text-sm text-muted-foreground">No tags</span>}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ClientBasicInfo client={client} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">

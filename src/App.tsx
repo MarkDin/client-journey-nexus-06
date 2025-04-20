@@ -32,7 +32,7 @@ const AppWithClientDrawer = () => {
       <Routes>
         <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<Dashboard />} />
-        <Route path="/visit-info" element={<VisitInfo />} />
+        {/* <Route path="/visit-info" element={<VisitInfo />} /> */}
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/:id" element={<ClientDetails />} />
         <Route path="/orders" element={<Orders />} />
