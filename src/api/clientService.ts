@@ -1,28 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export interface Client {
-  id: string;
-  name: string;
-  company: string;
-  industry?: string;
-  region?: string;
-  credit_level?: string;
-  credit_limit?: number;
-  credit_used?: number;
-  address?: string;
-  email?: string;
-  phone?: string;
-  tags?: string[];
-  ai_summary?: string;
-  key_insights?: string[];
-  next_meeting?: string;
-  sales_rep?: string;
-  last_order?: string;
-  status?: number;
-  score?: number;
-  created_at?: string;
-  customer_code: string;
-}
 
 export interface ClientCommunication {
   id: number;

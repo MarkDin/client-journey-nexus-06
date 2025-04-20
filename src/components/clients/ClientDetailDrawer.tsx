@@ -168,7 +168,7 @@ export function ClientDetailDrawer({ customerCode, onClose, open }: ClientDetail
             <div>
               <SheetTitle className="text-xl">{client.company}</SheetTitle>
               <SheetDescription className="text-sm text-muted-foreground">
-                {client.industry} {client.region ? `· ${client.region}` : ''}
+                {client.region}
               </SheetDescription>
             </div>
             <SheetClose asChild>
@@ -323,10 +323,6 @@ export function ClientDetailDrawer({ customerCode, onClose, open }: ClientDetail
                     <Card>
                       <CardHeader className="pb-2 flex items-center justify-between">
                         <CardTitle>Recent Orders</CardTitle>
-                        <Button variant="outline" size="sm" className="gap-1">
-                          <DollarSign className="h-3.5 w-3.5" />
-                          View All
-                        </Button>
                       </CardHeader>
                       <CardContent>
                         {formattedOrders.length > 0 ? (
@@ -355,29 +351,6 @@ export function ClientDetailDrawer({ customerCode, onClose, open }: ClientDetail
                       </CardContent>
                     </Card>
 
-                    <div className="grid grid-cols-2 gap-4 mt-4">
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm">Product Mix</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 flex items-center justify-center">
-                          <div className="w-20 h-20 flex items-center justify-center">
-                            <PieChart className="w-full h-full text-muted-foreground" />
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm">Margin Trend</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-4 flex items-center justify-center">
-                          <div className="w-20 h-20 flex items-center justify-center">
-                            <BarChart2 className="w-full h-full text-muted-foreground" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
                   </>
                 )}
               </TabsContent>

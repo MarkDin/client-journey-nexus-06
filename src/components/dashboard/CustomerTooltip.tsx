@@ -24,7 +24,7 @@ export function CustomerTooltip({ active, payload }: CustomerTooltipProps) {
         Country: {data.country}
       </p>
       <p className="text-sm text-muted-foreground">
-        Sales Level: {data.sales}
+        Sales: {data.sales}
       </p>
       {/* <p className="text-sm text-muted-foreground text-xs opacity-70">
         Code: {data.customerCode}
