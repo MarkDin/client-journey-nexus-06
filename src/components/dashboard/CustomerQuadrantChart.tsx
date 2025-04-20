@@ -3,8 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCustomerData } from '@/hooks/useCustomerQuadrantData';
+import type { CustomerQuadrantFilters as Filters } from '@/types/customer';
 import { AlertCircle } from "lucide-react";
+import { useMemo, useState } from 'react';
 import { CartesianGrid, ReferenceLine, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from 'recharts';
+import { CustomerQuadrantFilters } from './CustomerQuadrantFilters';
 import { CustomerTooltip } from './CustomerTooltip';
 
 interface CustomerQuadrantChartProps {
@@ -13,6 +16,16 @@ interface CustomerQuadrantChartProps {
 
 export function CustomerQuadrantChart({ onCustomerSelect }: CustomerQuadrantChartProps) {
   const { data, isLoading, error } = useCustomerData();
+  const [filters, setFilters] = useState<Filters>({});
+
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    return data.filter(item => {
+      if (filters.country && item.country !== filters.country) return false;
+      if (filters.sales && item.sales !== filters.sales) return false;
+      return true;
+    });
+  }, [data, filters]);
 
   const chartConfig = {
     scatter: {
@@ -70,6 +83,13 @@ export function CustomerQuadrantChart({ onCustomerSelect }: CustomerQuadrantChar
         <p className="text-sm text-center text-muted-foreground">Click on data points to view detailed trend charts</p>
       </CardHeader>
       <CardContent>
+        {data && (
+          <CustomerQuadrantFilters
+            data={data}
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
+        )}
         <div className="h-[500px] relative">
           <ChartContainer config={chartConfig}>
             <ResponsiveContainer width="100%" height="100%">
@@ -111,7 +131,7 @@ export function CustomerQuadrantChart({ onCustomerSelect }: CustomerQuadrantChar
                 <ReferenceLine x={0} stroke="#E5E7EB" strokeWidth={2} />
                 <ReferenceLine y={0} stroke="#E5E7EB" strokeWidth={2} />
                 <Scatter
-                  data={data}
+                  data={filteredData}
                   fill="var(--color-scatter)"
                   opacity={0.7}
                   onClick={(data) => onCustomerSelect(data.customerCode)}

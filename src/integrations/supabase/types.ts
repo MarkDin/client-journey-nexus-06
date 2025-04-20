@@ -113,6 +113,27 @@ export type Database = {
           },
         ]
       }
+      clients_quarter_trend: {
+        Row: {
+          client_name: string | null
+          created_at: string
+          id: number
+          newest_quarter_trend_picture: string | null
+        }
+        Insert: {
+          client_name?: string | null
+          created_at?: string
+          id?: number
+          newest_quarter_trend_picture?: string | null
+        }
+        Update: {
+          client_name?: string | null
+          created_at?: string
+          id?: number
+          newest_quarter_trend_picture?: string | null
+        }
+        Relationships: []
+      }
       customer_extra: {
         Row: {
           company_name: string | null
@@ -156,6 +177,7 @@ export type Database = {
           material: string | null
           order_amount: number | null
           order_month: string | null
+          order_year: string | null
           product_type: string | null
           sales_person: string | null
           type: string | null
@@ -169,6 +191,7 @@ export type Database = {
           material?: string | null
           order_amount?: number | null
           order_month?: string | null
+          order_year?: string | null
           product_type?: string | null
           sales_person?: string | null
           type?: string | null
@@ -182,6 +205,7 @@ export type Database = {
           material?: string | null
           order_amount?: number | null
           order_month?: string | null
+          order_year?: string | null
           product_type?: string | null
           sales_person?: string | null
           type?: string | null
@@ -208,6 +232,7 @@ export type Database = {
           phone: string | null
           purchase_count: number | null
           region: string | null
+          sales: string | null
           sales_rep: string | null
           score: number | null
           short_name: string | null
@@ -233,6 +258,7 @@ export type Database = {
           phone?: string | null
           purchase_count?: number | null
           region?: string | null
+          sales?: string | null
           sales_rep?: string | null
           score?: number | null
           short_name?: string | null
@@ -258,6 +284,7 @@ export type Database = {
           phone?: string | null
           purchase_count?: number | null
           region?: string | null
+          sales?: string | null
           sales_rep?: string | null
           score?: number | null
           short_name?: string | null
@@ -593,6 +620,10 @@ export type Database = {
         }[]
       }
       sync_customers_from_orders: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_order_year: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }

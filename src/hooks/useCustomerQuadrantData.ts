@@ -1,6 +1,5 @@
-
-import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from 'react';
 
 interface CustomerTrend {
     id: number;
@@ -10,6 +9,8 @@ interface CustomerTrend {
     z: number;
     totalAmount: number;
     customerCode: string;
+    country: string;
+    sales: string;
 }
 
 export function useCustomerData() {
@@ -30,9 +31,6 @@ export function useCustomerData() {
                     throw new Error(error.message);
                 }
 
-                trendData.map((item: CustomerTrend) => {
-                    item.z = item.z;
-                });
                 setData(Array.isArray(trendData) ? trendData : []);
                 setIsLoading(false);
             } catch (err) {
