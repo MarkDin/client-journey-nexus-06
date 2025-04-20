@@ -54,8 +54,8 @@ serve(async (req)=>{
     const transformedData = customerTrendData.map((customer)=>({
         id: customer.id,
         name: customer.company_name || `Customer ${customer.customer_code}`,
-        x: customer.short_trend_slope,
-        y: customer.long_trend_slope,
+        x: customer.long_trend_slope,
+        y: customer.short_trend_slope,
         z: customer.order_amount_in_the_past_year,
         totalAmount: customer.order_amount_in_the_past_year,
         customerCode: customer.customer_code,

@@ -11,12 +11,12 @@ export function CustomerTooltip({ active, payload }: CustomerTooltipProps) {
   return (
     <div className="rounded-lg border bg-white p-2 shadow-md">
       <p className="font-medium">{data.name}</p>
-      <p className="text-sm text-muted-foreground">
+      {/* <p className="text-sm text-muted-foreground">
         Short-term Trend: {data.x.toFixed(1)}%
       </p>
       <p className="text-sm text-muted-foreground">
         Long-term Trend: {data.y.toFixed(1)}%
-      </p>
+      </p> */}
       <p className="text-sm text-muted-foreground">
         Total Order Amount: ${data.totalAmount.toLocaleString()}
       </p>
@@ -26,9 +26,9 @@ export function CustomerTooltip({ active, payload }: CustomerTooltipProps) {
       <p className="text-sm text-muted-foreground">
         Sales Level: {data.sales}
       </p>
-      <p className="text-sm text-muted-foreground text-xs opacity-70">
+      {/* <p className="text-sm text-muted-foreground text-xs opacity-70">
         Code: {data.customerCode}
-      </p>
+      </p> */}
     </div>
   );
 }

@@ -102,23 +102,23 @@ export function CustomerQuadrantChart({ onCustomerSelect }: CustomerQuadrantChar
                 />
                 <XAxis
                   type="number"
-                  dataKey="x"
-                  name="Short-term Trend"
-                  unit="%"
-                  domain={[-25, 25]}
-                  tickLine={false}
-                  axisLine={{ stroke: '#E5E7EB' }}
-                  label={{ value: 'Short-term Trend (%)', position: 'bottom' }}
-                />
-                <YAxis
-                  type="number"
                   dataKey="y"
                   name="Long-term Trend"
                   unit="%"
                   domain={[-25, 25]}
                   tickLine={false}
                   axisLine={{ stroke: '#E5E7EB' }}
-                  label={{ value: 'Long-term Trend (%)', angle: -90, position: 'left' }}
+                  label={{ value: 'Long-term Trend (%)', position: 'bottom' }}
+                />
+                <YAxis
+                  type="number"
+                  dataKey="x"
+                  name="Short-term Trend"
+                  unit="%"
+                  domain={[-25, 25]}
+                  tickLine={false}
+                  axisLine={{ stroke: '#E5E7EB' }}
+                  label={{ value: 'Short-term Trend (%)', angle: -90, position: 'left' }}
                 />
                 <ZAxis
                   type="number"
@@ -138,10 +138,10 @@ export function CustomerQuadrantChart({ onCustomerSelect }: CustomerQuadrantChar
                   cursor="pointer"
                 />
                 {/* Quadrant Labels */}
-                <QuadrantLabel x={-15} y={-15} label="Long-term↓ Short-term↑" />
-                <QuadrantLabel x={15} y={-15} label="Long-term↑ Short-term↑" />
-                <QuadrantLabel x={-15} y={15} label="Long-term↓ Short-term↓" />
-                <QuadrantLabel x={15} y={15} label="Long-term↑ Short-term↓" />
+                <QuadrantLabel x={-15} y={-15} label="Short-term↓ Long-term↑" />
+                <QuadrantLabel x={15} y={-15} label="Short-term↑ Long-term↑" />
+                <QuadrantLabel x={-15} y={15} label="Short-term↓ Long-term↓" />
+                <QuadrantLabel x={15} y={15} label="Short-term↑ Long-term↓" />
               </ScatterChart>
             </ResponsiveContainer>
           </ChartContainer>
