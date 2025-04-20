@@ -56,7 +56,12 @@ const Dashboard = () => {
       <CustomerQuadrantChart onCustomerSelect={handleClientCustomerCodeSelect} />
     </div>
 
-    <OrdersSidebar isOpen={ordersSidebarOpen} onClose={() => setOrdersSidebarOpen(false)} onClientSelect={handleClientCustomerCodeSelect} selectedCountry={selectedCountry} />
+    <OrdersSidebar 
+      isOpen={ordersSidebarOpen} 
+      onClose={() => setOrdersSidebarOpen(false)} 
+      selectedRegion={selectedCountry || undefined}
+      selectedMonth={new Date().toISOString().slice(0, 7)}
+    />
   </AppLayout>;
 };
 
