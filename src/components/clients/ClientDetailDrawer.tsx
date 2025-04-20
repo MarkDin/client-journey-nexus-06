@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useClientData } from "@/hooks/useClientData";
 import { ClientCommunication, updateSummary } from "@/api/clientService";
+import { supabase } from "@/integrations/supabase/client";
 import {
   BarChart2,
   Building,
@@ -36,7 +37,7 @@ import {
   User,
   X
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { EditSummaryDialog } from "./EditSummaryDialog";
 
@@ -54,7 +55,35 @@ export function ClientDetailDrawer({ customerCode, onClose, open }: ClientDetail
     tags: string[];
     weekLabel: string;
   } | null>(null);
+  const [quarterTrendImage, setQuarterTrendImage] = useState<string | null>(null);
+  const [isLoadingTrendImage, setIsLoadingTrendImage] = useState(false);
   const { client, communications, orders, summary, isLoading, error, refetch } = useClientData(customerCode);
+
+  useEffect(() => {
+    const fetchQuarterTrendImage = async () => {
+      if (!customerCode) return;
+      
+      try {
+        setIsLoadingTrendImage(true);
+        const { data, error } = await supabase.functions.invoke('get-client-quarter-trend', {
+          body: { customerCode }
+        });
+
+        if (error) throw error;
+        console.log('get image part is', data.image);
+        if (data?.image) {
+          setQuarterTrendImage(data.image);
+        }
+      } catch (err) {
+        console.error('Error fetching quarter trend image:', err);
+        toast.error('Failed to load quarter trend image');
+      } finally {
+        setIsLoadingTrendImage(false);
+      }
+    };
+
+    fetchQuarterTrendImage();
+  }, [customerCode]);
 
   if (!open) return null;
 
@@ -325,8 +354,27 @@ export function ClientDetailDrawer({ customerCode, onClose, open }: ClientDetail
               </TabsContent>
 
               <TabsContent value="orders" className="mt-4">
-                <OrderTrendChart clientName={client.company} className="mb-4" />
-
+                {isLoadingTrendImage ? (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : quarterTrendImage ? (
+                  <Card className="mb-4">
+                    <CardHeader className="pb-2">
+                      <CardTitle>Order Trend Analysis</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <img 
+                        src={quarterTrendImage} 
+                        alt="Order Trend" 
+                        className="w-full rounded-lg"
+                      />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <OrderTrendChart clientName={client.company} className="mb-4" />
+                )}
+                
                 <Card>
                   <CardHeader className="pb-2 flex items-center justify-between">
                     <CardTitle>Recent Orders</CardTitle>
